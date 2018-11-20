@@ -104,3 +104,11 @@ venv.bak/
 .mypy_cache/
 
 .vscode/
+debug/
+DEBUG/
+Debug/
+out/
+*.o
+__pycache__/
+*.pyc
+sql_config.json

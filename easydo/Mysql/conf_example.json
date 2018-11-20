@@ -1,0 +1,7 @@
+{
+    "hosts":"192.168.1.1",
+    "users":"wlw",
+    "passwds":"12345",
+    "databases":"test",
+    "charset":"utf8"
+}
