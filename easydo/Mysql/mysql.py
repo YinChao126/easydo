@@ -111,3 +111,9 @@ if __name__ == '__main__':
     test.df_to_mysql("timestampTest", aTestDF)
     df = test.query("select * from timestampTest")
     print(df)
+
+    # create a new table
+    aTestDF = pd.DataFrame({"name": list("DEFGHI")})
+    test.df_to_mysql("nwT",aTestDF)
+    df = test.query("select * from nwT")
+    print(df)
