@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 
-
 import os
 import pymysql
 from sqlalchemy import create_engine
@@ -114,6 +113,6 @@ if __name__ == '__main__':
 
     # create a new table
     aTestDF = pd.DataFrame({"name": list("DEFGHI")})
-    test.df_to_mysql("nwT",aTestDF)
+    test.df_to_mysql("nwT", aTestDF)
     df = test.query("select * from nwT")
     print(df)
