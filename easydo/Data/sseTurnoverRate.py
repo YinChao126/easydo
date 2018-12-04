@@ -4,6 +4,7 @@ from selenium import webdriver
 import os
 import time
 import pandas as pd
+import sys
 
 currentPath = os.path.dirname(os.path.abspath(__file__))
 chromeD = currentPath + os.path.sep + "src" + os.path.sep + "chromedriver.exe"
@@ -31,3 +32,30 @@ print("上海市場 换手率(%) {}".format(elem0))
 print("A股 换手率(%) {}".format(elem1))
 print("B股 换手率(%) {}".format(elem2))
 browser.quit()
+
+parentPath = os.path.dirname(currentPath) + os.path.sep + "Mysql"
+print(parentPath)
+
+sys.path.append(parentPath)
+import mysql
+
+dataL = []
+shanghaiL = []
+AL = []
+BL = []
+dataL.append(curTime)
+shanghaiL.append(elem0)
+AL.append(elem1)
+BL.append(elem2)
+df = pd.DataFrame({
+    "日期": dataL,
+    "上海市場 换手率(%)": shanghaiL,
+    "A股 换手率(%)": AL,
+    "B股 换手率(%)": BL
+})
+print(df)
+# 初始化入庫模塊并數據入庫
+inmysql = mysql.sql()
+inmysql.init_by_cfg_file(parentPath + os.path.sep + 'sql_config.json')
+inmysql.df_to_mysql("sseTurnOverRate", df)
+print("完成數據入庫mysql")
