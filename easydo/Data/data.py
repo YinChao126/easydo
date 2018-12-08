@@ -23,12 +23,12 @@ class data:
     def get_index_data(self,id):
         api = ts.pro_api('2dbe42e7773b4591a74a07d19a30f3f7d9a663f2023f27f6e38dfde1')
         a = []
-        for i in range(1990,2020,5):
+        for i in range(1990,2030,5):
             print(i)
             print(str(i)+'0101')
             print(str(i+5)+'0101')
             a.append(ts.pro_bar(pro_api=api, ts_code=id, asset='I', start_date=str(i)+'0101', end_date=str(i+5)+'0101'))
-        return pd.concat(a)    
+        return pd.concat(a).drop_duplicates()   
 
     '''
     股票列表,包括属性：
