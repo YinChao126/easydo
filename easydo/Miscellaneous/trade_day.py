@@ -30,7 +30,7 @@ def get_day_type(query_date):
     if content:  
         try:  
             day_type = int(content)  
-        except ValueError:  
+        except ValueError: 
             return -1  
         else:  
             return day_type  

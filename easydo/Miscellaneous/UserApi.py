@@ -11,7 +11,8 @@ import Config
 global self_result
 global compare_result
 
-def Init(company_id_list, data_src = 'CSV'):
+
+def Init(company_id_list, data_src='CSV'):
     '''
     初始化配置函数
     company_id_list:待考察的id列表（1个到n个，eg: ['000651','00124','600660']
@@ -19,7 +20,8 @@ def Init(company_id_list, data_src = 'CSV'):
     '''
     Config.M1809_config(company_id_list, data_src)
 
-def GetData(file_switch = 'ON'):
+
+def GetData(file_switch='ON'):
     '''
     获取财务原始数据
     file_switch: 'ON'结果输出到文本（默认） 'OFF'原始结果不输出
@@ -28,16 +30,18 @@ def GetData(file_switch = 'ON'):
     '''
     global self_result
     global compare_result
-    
-    self_result = CoreAnalyse.Compare2Themself(Config.company_id_list[0])    #自身对比
-    b1= CoreAnalyse.Compare2Industry(Config.company_id_list)    #同行业对比
+
+    self_result = CoreAnalyse.Compare2Themself(
+        Config.company_id_list[0])  #自身对比
+    b1 = CoreAnalyse.Compare2Industry(Config.company_id_list)  #同行业对比
     compare_result = CoreAnalyse.data_normalize(b1)  #归一化的同行业对比
     if file_switch == 'ON':
-        self_result.to_csv('../output/compare_self.csv', encoding= 'gbk') 
-        b1.to_csv('../output/compare_industry.csv', encoding = 'gbk')
-        compare_result.to_csv('../output/normalize.csv', encoding = 'gbk') 
+        self_result.to_csv('../output/compare_self.csv', encoding='gbk')
+        b1.to_csv('../output/compare_industry.csv', encoding='gbk')
+        compare_result.to_csv('../output/normalize.csv', encoding='gbk')
 
     return self_result, compare_result
+
 
 def Analyse():
     '''
@@ -46,12 +50,12 @@ def Analyse():
     2. 控制台输出对比图像（之后可以考虑保存图片）
     '''
     global self_result
-    global compare_result  
+    global compare_result
     CoreAnalyse.Analyse(self_result, compare_result)
     PlotAnalyse.PlotAnalyse(self_result)
-    
-    
-if __name__ =='__main__':
+
+
+if __name__ == '__main__':
     id_list = ['000651', '000333', '600690']
-    para,company = Init(id_list,'CSV')
+    para, company = Init(id_list, 'CSV')
     a = CoreAnalyse.Compare2Themself(company)
