@@ -1,4 +1,5 @@
 import get_price
+import pandas as pd
 import tushare as ts
 
 class data:
@@ -15,6 +16,19 @@ class data:
     '''   
     def get_period_k_day(self, id, start_day, stop_day = 0):
         return get_price.get_period_k_day(id, start_day, stop_day)
+
+    '''
+    获取一段时间内的指数
+    ''' 
+    def get_index_data(self,id):
+        api = ts.pro_api('2dbe42e7773b4591a74a07d19a30f3f7d9a663f2023f27f6e38dfde1')
+        a = []
+        for i in range(1990,2030,5):
+            print(i)
+            print(str(i)+'0101')
+            print(str(i+5)+'0101')
+            a.append(ts.pro_bar(pro_api=api, ts_code=id, asset='I', start_date=str(i)+'0101', end_date=str(i+5)+'0101'))
+        return pd.concat(a).drop_duplicates()   
 
     '''
     股票列表,包括属性：
@@ -144,11 +158,10 @@ if __name__ == '__main__':
     sys.path.append(DATA_DIR)
     
     data = data()
-
-    print(data.get_period_k_day('601012','20181001'))
+    print(data.get_index_data("000001.SH"))
 
 '''
-    print("盈利能力")
+   print("盈利能力")
     print(data.get_profit_data(2018,2))
     print("营运")
     print(data.get_operation_data(2018,2))
@@ -160,7 +173,7 @@ if __name__ == '__main__':
     print(data.get_cashflow_data(2018,2))
 '''
 
-    
+
 
 
 
