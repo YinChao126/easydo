@@ -5,16 +5,17 @@ Created on Thu Jun 14 01:47:40 2018
 @author: yinchao
 """
 
+print (__name__)
 import sys
-sys.path.append('../')
-sys.path.append('./')
+# sys.path.append('../')
+# sys.path.append('./')
 
 from datetime import datetime
 import crawling_finance_table
 import crawling_finance_table_v1_7
 import pymysql
 import os
-# from ..Mysql import mysql
+from ...Mysql import mysql
 
 def Connect_sql(account):
     conn = pymysql.connect(
