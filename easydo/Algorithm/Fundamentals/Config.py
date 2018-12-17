@@ -6,30 +6,14 @@ Created on Thu Jun 14 01:47:40 2018
 """
 
 import sys
-sys.path.append('../')
-sys.path.append('./')
+sys.path.append('.\\easydo')  # 把.\\easydo加入搜索路径
 
 from datetime import datetime
 import crawling_finance_table
 import crawling_finance_table_v1_7
 import pymysql
 import os
-# from ..Mysql import mysql
-
-def Connect_sql(account):
-    conn = pymysql.connect(
-        host=account[0].strip(),
-        port=3306,
-        user=account[1].strip(),
-        passwd=account[2].strip(),
-        db=account[3].strip(),
-        charset="utf8")
-
-    cur = conn.cursor()
-    #    print(account)
-    print("\nconnect to aliyun success!\n")
-    return cur
-
+from Mysql import mysql
 
 global parameter
 parameter = [
@@ -42,7 +26,7 @@ parameter = [
 global company_id_list
 company_id_list = ['000651', '000333', '600690']  # 此处可以修改
 global data_base_path
-data_base_path = './history_data/'
+data_base_path = '.\\easydo\\Algorithm\\Fundamentals\\history_data\\'  #所有的相对路径都是基于工作路径，vscode的相对路径为工程的根路径
 
 global data_src
 global cur
@@ -53,7 +37,6 @@ def M1809_config(company_list, mode='CSV'):
     本地模式配置
     只需要提供感兴趣的对比公司即可，如果只有一个，说明只进行自主分析
     '''
-    global data_base_path
     global data_src
     global cur
     global parameter
@@ -64,12 +47,13 @@ def M1809_config(company_list, mode='CSV'):
     print('please wait, check for updating...')
 
     try:  # 自动检查并创建文件夹
-        os.mkdir('./history_data')
-    except Exception:
+        os.mkdir(.\\easydo\\Algorithm\\Fundamentals\\history_data)
+    except Exception as e:
+        print(e)
         pass
 
     try:  # 自动检查并创建文件夹
-        os.mkdir('./output')
+        os.mkdir('.\\easydo\\Algorithm\\Fundamentals\\output')
     except Exception:
         pass
 
@@ -87,7 +71,7 @@ def M1809_config(company_list, mode='CSV'):
         3. 更新该公司的财务报表，以备以后使用
         注意：文件名不可改
         '''
-        test = Mysql.mysql.sql()
+        test = mysql.sql()
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         SQL_DIR = BASE_DIR + r'\Mysql'
         s = test.init_by_cfg_file(SQL_DIR + r'\sql_config.json')
@@ -172,7 +156,7 @@ def M1809_Update(cur, id_list):
 if __name__ == '__main__':
     id_list = ['000651', '000333', '600690', '600522']
     #网络测试
-    # M1809_config(id_list, 'SQL')
+    M1809_config(id_list, 'SQL')
 
     #本地测试
 #    M1809_config(id_list, 'CSV')
