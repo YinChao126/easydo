@@ -115,7 +115,6 @@ def M1809_Update(cur, id_list):
     #    print(id_list)
     for item in id_list:
         try:
-
             cmd = "select * from zichanfuzhai where h79 = \'" + item + "\' and h80 = \'" + str(
                 datetime.now().year - 1) + "-12-31\';"
             cur.execute(cmd)
