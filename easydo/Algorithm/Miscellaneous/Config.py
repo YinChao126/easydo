@@ -5,32 +5,15 @@ Created on Thu Jun 14 01:47:40 2018
 @author: yinchao
 """
 
-print (__name__)
 import sys
-# sys.path.append('../')
-# sys.path.append('./')
+sys.path.append('.\\easydo')
 
 from datetime import datetime
 import crawling_finance_table
 import crawling_finance_table_v1_7
 import pymysql
 import os
-from ...Mysql import mysql
-
-def Connect_sql(account):
-    conn = pymysql.connect(
-        host=account[0].strip(),
-        port=3306,
-        user=account[1].strip(),
-        passwd=account[2].strip(),
-        db=account[3].strip(),
-        charset="utf8")
-
-    cur = conn.cursor()
-    #    print(account)
-    print("\nconnect to aliyun success!\n")
-    return cur
-
+from Mysql import mysql
 
 global parameter
 parameter = [
@@ -88,7 +71,7 @@ def M1809_config(company_list, mode='CSV'):
         3. 更新该公司的财务报表，以备以后使用
         注意：文件名不可改
         '''
-        test = Mysql.mysql.sql()
+        test = mysql.sql()
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         SQL_DIR = BASE_DIR + r'\Mysql'
         s = test.init_by_cfg_file(SQL_DIR + r'\sql_config.json')
@@ -173,7 +156,7 @@ def M1809_Update(cur, id_list):
 if __name__ == '__main__':
     id_list = ['000651', '000333', '600690', '600522']
     #网络测试
-    # M1809_config(id_list, 'SQL')
+    M1809_config(id_list, 'SQL')
 
     #本地测试
 #    M1809_config(id_list, 'CSV')
