@@ -1,6 +1,6 @@
 import sys
 import os
-import pymysql
+# import pymysql
 from sqlalchemy import create_engine
 import json
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

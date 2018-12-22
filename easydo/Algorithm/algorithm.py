@@ -1,4 +1,4 @@
-import stock_bond_rate
+import Algorithm.stock_bond_rate as stock_bond_rate
 
 class algorithm:
 
@@ -22,14 +22,14 @@ class algorithm:
         print('you should invest %d to stock' % stock_money)
         return rate, advise_list
 
-if __name__ == '__main__':
-    import sys
-    import os
-    BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ALG_DIR = BASE_DIR + r'\Algorithm'
-    sys.path.append(ALG_DIR)
+# if __name__ == '__main__':
+#     import sys
+#     import os
+#     BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     ALG_DIR = BASE_DIR + r'\Algorithm'
+#     sys.path.append(ALG_DIR)
 
-    stock_list = ['600660','601012','000651','600522']
-    test = algorithm()
-    a, b = test.GetAdvise(10000, stock_list)
-    print(a, b)
+#     stock_list = ['600660','601012','000651','600522']
+#     test = algorithm()
+#     a, b = test.GetAdvise(10000, stock_list)
+#     print(a, b)

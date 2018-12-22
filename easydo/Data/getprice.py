@@ -2,6 +2,7 @@
 """
 从163网址上获取指定ID指定时间段的K线数据
 """
+import os
 import requests
 import re
 import datetime 
@@ -11,7 +12,6 @@ import pandas as pd
 完整网址：
 http://quotes.money.163.com/service/chddata.html?code=0%06d&start=%d&end=%d&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;VOTURNOVER;VATURNOVER
 '''
-
 
 def get_close_price(id, day = 0):
     '''
