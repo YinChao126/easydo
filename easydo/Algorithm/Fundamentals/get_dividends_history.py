@@ -161,5 +161,5 @@ def get_bonus_table(id):
 #print(s)
 #2017年的派息实际是在2018派发，所以登记日时间上是2018年
 #测试股息率
-#PX,Date=get_px_single_year('601012',2017)
-#print(PX,Date)
+PX,Date=get_px_single_year('601012',2017)
+print(PX,Date)

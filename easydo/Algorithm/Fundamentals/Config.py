@@ -47,7 +47,7 @@ def M1809_config(company_list, mode='CSV'):
     print('please wait, check for updating...')
 
     try:  # 自动检查并创建文件夹
-        os.mkdir(.\\easydo\\Algorithm\\Fundamentals\\history_data)
+        os.mkdir(".\\easydo\\Algorithm\\Fundamentals\\history_data")
     except Exception as e:
         print(e)
         pass

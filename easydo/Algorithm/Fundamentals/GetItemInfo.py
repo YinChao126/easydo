@@ -318,7 +318,7 @@ def GetSingleLocalItem(stock_id, year, quarter=4):
         time_str = str(year) + '-12-31'
     time_str_last_year = str(year - 1) + '-12-31'
 
-    prefix = '../history_data/'
+    prefix = '.\\easydo\\Algorithm\\Fundamentals\\history_data\\'
     suffix_balnce_sheet = '_balance_sheet.csv'
     suffix_cash_flow = '_cash_flow.csv'
     suffix_profit = '_profit.csv'
