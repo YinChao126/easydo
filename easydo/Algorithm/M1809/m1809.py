@@ -7,6 +7,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from crawling_finance_table_v1_7 import crawling_finance
 from CoreAnalyse import CoreAnalyse
+import PlotAnalyse
 
 class M1809:
     def __init__(self,company_id_list,DataSource='SQL',LocalStore = 'ON'):
@@ -16,7 +17,7 @@ class M1809:
         self.BasePath = '.\\easydo\\Algorithm\\M1809'
         self.HstPath = os.path.join(self.BasePath,"history_data")
         self.OutPath = os.path.join(self.BasePath,"output")
-
+        self.AnalyseObj = CoreAnalyse()
         if(DataSource !="SQL" and DataSource!='sql'):
             self.DataSource = "CSV"   #从CSV文件中读取数据#从数据库中读取数据
             if (os.path.exists(self.HstPath)):
@@ -84,15 +85,24 @@ class M1809:
         
 
     def M1809_GetData(self):
-        AnalyseObj = CoreAnalyse(self.DataSource)
-        self_result = AnalyseObj.Compare2Themself(self.company_id_list[0])  #自身对比
-        b1 =  AnalyseObj.Compare2Industry(self.company_id_list)  #同行业对比
-        compare_result =  AnalyseObj.data_normalize(b1)  #归一化的同行业对比
+        self_result = self.AnalyseObj.Compare2Themself(self.company_id_list[0])  #自身对比
+        b1 =  self.AnalyseObj.Compare2Industry(self.company_id_list)  #同行业对比
+        compare_result =  self.AnalyseObj.data_normalize(b1)  #归一化的同行业对比
         if self.LocalStore == 'ON':
             self_result.to_csv('../output/compare_self.csv', encoding='gbk')
             b1.to_csv('../output/compare_industry.csv', encoding='gbk')
             compare_result.to_csv('../output/normalize.csv', encoding='gbk')
         return self_result, compare_result
+
+    def M1809_Analyse(self):
+        '''
+        对比分析，并输出
+        1. ../output/文件夹下会生成诊断报告
+        2. 控制台输出对比图像（之后可以考虑保存图片）
+        '''
+        self_result,compare_result = self. M1809_GetData()
+        self.AnalyseObj.Analyse(self_result, compare_result)
+        PlotAnalyse.PlotAnalyse(self_result)
 
     def M1809_Run(self):
         _M1809_Init()
@@ -103,6 +113,4 @@ if __name__ == '__main__':
     company_id_list =  ['000651', '000333']
     DataSource = "CSV"
     AObject = M1809(company_id_list,DataSource)
-    self_result, compare_result = AObject.M1809_GetData()
-    print (self_result)
-    print (compare_result)
+    self_result, compare_result = AObject.M1809_Analyse()

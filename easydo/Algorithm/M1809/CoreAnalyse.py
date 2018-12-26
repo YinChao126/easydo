@@ -17,8 +17,8 @@ import txttoexcel
 import PlotAnalyse
 
 class CoreAnalyse:
-    def __init__(self,DataSource="SQL"):
-        self.DataSource = DataSource
+    # def __init__(self,DataSource="SQL"):
+    #     self.DataSource = DataSource
 
 
     ## API接口函数
@@ -34,9 +34,9 @@ class CoreAnalyse:
             fh.write('版本号：V1.0\n')
             fh.write('诊断时间：'+ s1 +'\n')
             fh.write('诊断个股：'+ Config.company_id_list[0] + '\n')
-            SelfAnalyse(fh, self_data) #同比分析并写文件
-            CompareAnalyse(fh, total_data) #同行业对比分析并写文件
-            ComprehensiveResult(fh) #手动分析部分（不用关心）
+            self.SelfAnalyse(fh, self_data) #同比分析并写文件
+            self.CompareAnalyse(fh, total_data) #同行业对比分析并写文件
+            self.ComprehensiveResult(fh) #手动分析部分（不用关心）
 
         # write excel
         file_list = txttoexcel.read_txt(file_name)
@@ -59,16 +59,16 @@ class CoreAnalyse:
         fh.write('--------------------------------------------\n')
     #    print('1. 资产水平分析')
         fh.write('1.资产水平分析：\n')
-        avg, last, level = GetGrowth(data,0)    #总资产_复合增长率
+        avg, last, level = self.GetGrowth(data,0)    #总资产_复合增长率
     #    print(avg, last)
-        FileOutGrowth(fh, '总资产增长率:',avg,last,level)
-        avg, last, level = GetGrowth(data,1)    #净资产_复合增长率
+        self.ileOutGrowth(fh, '总资产增长率:',avg,last,level)
+        avg, last, level = self.GetGrowth(data,1)    #净资产_复合增长率
     #    print(avg, last)
-        FileOutGrowth(fh, '净资产增长率:',avg,last,level)
-        rate = GetRate(data, 3, 0) #流动资产_总资产占比
+        self.ileOutGrowth(fh, '净资产增长率:',avg,last,level)
+        rate = self.GetRate(data, 3, 0) #流动资产_总资产占比
         fh.write('流动资产占比：'+str(rate) + '(需增加行业对比)\n')
     #    print(rate)
-        debt_avg, debt_last = GetAverage(data,2) #资产负债比_平均水平
+        debt_avg, debt_last = self.GetAverage(data,2) #资产负债比_平均水平
     #    print(debt_avg, debt_last,'\n')
         fh.write('资产负债比：'+ str(debt_avg) + ',' + str(debt_last) + '(需增加行业对比)\t')
         if rate > 0.65:
@@ -82,54 +82,54 @@ class CoreAnalyse:
         fh.write('--------------------------------------------\n')
     #    print('经营质量分析')
         fh.write('2.经营质量分析：\n')
-        avg, last, level = GetGrowth(data,8)        #营业收入_复合增长率
-        FileOutGrowth(fh, '营收增长率:',avg,last,level)
+        avg, last, level = self.GetGrowth(data,8)        #营业收入_复合增长率
+        self.ileOutGrowth(fh, '营收增长率:',avg,last,level)
     #    print(avg, last)
-        avg, last = GetAverage(data,30)        #毛利率
-        FileOutAverage(fh, '毛利率', avg, last)
+        avg, last = self.GetAverage(data,30)        #毛利率
+        self.FileOutAverage(fh, '毛利率', avg, last)
     #    print(avg, last)
-        avg, last, level = GetGrowth(data,14)        #除非净利润
-        FileOutGrowth(fh, '除非净利润增长率:',avg,last,level)
+        avg, last, level = self.GetGrowth(data,14)        #除非净利润
+        self.ileOutGrowth(fh, '除非净利润增长率:',avg,last,level)
     #    print(avg, last)
-        avg, last, level = GetGrowth(data,10)        #营业税
-        FileOutGrowth(fh, '营业税增长率:',avg,last,level)
+        avg, last, level = self.GetGrowth(data,10)        #营业税
+        self.ileOutGrowth(fh, '营业税增长率:',avg,last,level)
     #    print(avg, last)
-        rate = GetRate(data,12,8) #现金与净资产的占比关系
+        rate = self.GetRate(data,12,8) #现金与净资产的占比关系
         fh.write('现金/净资产:\t'+str(rate*100)+'%\n')
     #    print(rate, '\n')
-        avg, last = GetAverage(data,33) #股息率
-        FileOutAverage(fh, '股息率', avg, last)
-        avg, last = GetAverage(data,34) #分红率
-        FileOutAverage(fh, '分红率', avg, last)
+        avg, last = self.GetAverage(data,33) #股息率
+        self.FileOutAverage(fh, '股息率', avg, last)
+        avg, last = self.GetAverage(data,34) #分红率
+        self.FileOutAverage(fh, '分红率', avg, last)
 
         #3.现金流分析
         fh.write('--------------------------------------------\n')
     #    print('现金流分析')
         fh.write('3.现金流分析：\n')
-        avg, last, level = GetGrowth(data,16)        #营业现金
-        FileOutGrowth(fh, '营业现金增长率:',avg,last,level)
+        avg, last, level = self.GetGrowth(data,16)        #营业现金
+        self.ileOutGrowth(fh, '营业现金增长率:',avg,last,level)
     #    print(avg, last)
-        avg, last, level = GetGrowth(data,20)        #增加的现金
-        FileOutGrowth(fh, '现金增长净额:',avg,last,level)
+        avg, last, level = self.GetGrowth(data,20)        #增加的现金
+        self.ileOutGrowth(fh, '现金增长净额:',avg,last,level)
     #    print(avg, last)
-        avg, last, level = GetGrowth(data,21)        #期末现金
-        FileOutGrowth(fh, '期末现金:',avg,last,level)
+        avg, last, level = self.GetGrowth(data,21)        #期末现金
+        self.ileOutGrowth(fh, '期末现金:',avg,last,level)
     #    print(avg, last)
-        rate = GetRate(data,21,1) #现金与净资产的占比关系
+        rate = self.GetRate(data,21,1) #现金与净资产的占比关系
     #    print(rate, '\n')
 
         #4.营运参数分析
         fh.write('--------------------------------------------\n')
     #    print('营运质量分析')
         fh.write('4.营运质量分析\n')
-        avg, last = GetAverage(data,22) #流动比率
-        FileOutAverage(fh, '流动比率', avg, last)
+        avg, last = self.GetAverage(data,22) #流动比率
+        self.FileOutAverage(fh, '流动比率', avg, last)
     #    print(avg, last)
-        avg, last = GetAverage(data,23) #资产周转率
-        FileOutAverage(fh, '资产周转率', avg, last)
+        avg, last = self.GetAverage(data,23) #资产周转率
+        self.FileOutAverage(fh, '资产周转率', avg, last)
     #    print(avg, last)
-        avg, last = GetAverage(data,24) #存货周转率
-        FileOutAverage(fh, '存货周转率', avg, last)
+        avg, last = self.GetAverage(data,24) #存货周转率
+        self.FileOutAverage(fh, '存货周转率', avg, last)
     #    print(avg, last, '\n')
 
     def CompareAnalyse(self,fh, data):
@@ -144,38 +144,38 @@ class CoreAnalyse:
         fh.write('--------------------------------------------\n')
         fh.write('1.资产类对比\n')
         score = 0 #初始分数100分
-        score += CompareItem(fh, '总资产对比：', data, 0)
-        score += CompareItem(fh, '净资产对比：', data, 1)
-        score += CompareItem(fh, '资产负债比：', data, 2, -1)
-        score += CompareItem(fh, '应收款：', data, 5,-1)
-        score += CompareItem(fh, '预收款：', data, 6)
-        score += CompareItem(fh, '存货：', data, 7)
+        score += self.CompareItem(fh, '总资产对比：', data, 0)
+        score += self.CompareItem(fh, '净资产对比：', data, 1)
+        score += self.CompareItem(fh, '资产负债比：', data, 2, -1)
+        score += self.CompareItem(fh, '应收款：', data, 5,-1)
+        score += self.CompareItem(fh, '预收款：', data, 6)
+        score += self.CompareItem(fh, '存货：', data, 7)
 
         fh.write('--------------------------------------------\n')
         fh.write('2.经营类对比\n')
-        score += CompareItem(fh, '营收', data, 8)
-        score += CompareItem(fh, '营业外收入', data, 12, -1) #没意义啊
-        score += CompareItem(fh, '除非净利润：', data, 14)
-        score += CompareItem(fh, '股息率', data, 33)
-        score += CompareItem(fh, '分红率', data, 34)
+        score += self.CompareItem(fh, '营收', data, 8)
+        score += self.CompareItem(fh, '营业外收入', data, 12, -1) #没意义啊
+        score += self.CompareItem(fh, '除非净利润：', data, 14)
+        score += self.CompareItem(fh, '股息率', data, 33)
+        score += self.CompareItem(fh, '分红率', data, 34)
 
         fh.write('--------------------------------------------\n')
         fh.write('3.现金流对比\n')
-        score += CompareItem(fh, '经营净额：', data, 16)
-        score += CompareItem(fh, '汇率影响：', data, 19, -1)
-        score += CompareItem(fh, '现金净增加额：', data, 20)
-        score += CompareItem(fh, '期末现金余额：', data, 21)
+        score += self.CompareItem(fh, '经营净额：', data, 16)
+        score += self.CompareItem(fh, '汇率影响：', data, 19, -1)
+        score += self.CompareItem(fh, '现金净增加额：', data, 20)
+        score += self.CompareItem(fh, '期末现金余额：', data, 21)
 
         fh.write('--------------------------------------------\n')
         fh.write('4.营运质量对比\n')
-        score += CompareItem(fh, '流动比率：', data, 22)
-        score += CompareItem(fh, '资产周转率：', data, 23)
-        score += CompareItem(fh, '存货周转率：', data, 24)
+        score += self.CompareItem(fh, '流动比率：', data, 22)
+        score += self.CompareItem(fh, '资产周转率：', data, 23)
+        score += self.CompareItem(fh, '存货周转率：', data, 24)
         #自动评级结论在此处输出
-        score += CompareItem(fh, 'ROE：', data, 28)
-        score += CompareItem(fh, '毛利率：', data, 30)
-        score += CompareItem(fh, '营收增长率：', data, 31)
-        score += CompareItem(fh, '除非净利润增长率：', data, 32)
+        score += self.CompareItem(fh, 'ROE：', data, 28)
+        score += self.CompareItem(fh, '毛利率：', data, 30)
+        score += self.CompareItem(fh, '营收增长率：', data, 31)
+        score += self.CompareItem(fh, '除非净利润增长率：', data, 32)
         print(score)
         stra = '---->>|同行业对比得分：\t' + str(score) + '\t|<----\n'
         fh.write(stra)
@@ -185,9 +185,9 @@ class CoreAnalyse:
         fh.write('--------------------------------------------\n')
         fh.write('--------------------------------------------\n')
         fh.write('重要指标对比\n')
-        CompareItem(fh, '估值比：', data, 25, -1)
-        CompareItem(fh, '市盈率：', data, 26, -1)
-        CompareItem(fh, '市净率：', data, 27, -1)
+        self.CompareItem(fh, '估值比：', data, 25, -1)
+        self.CompareItem(fh, '市盈率：', data, 26, -1)
+        self.CompareItem(fh, '市净率：', data, 27, -1)
 
 
     def ComprehensiveResult(self,fh):
@@ -201,7 +201,7 @@ class CoreAnalyse:
 
     ## 以下均为辅助函数，用户不用关心
     ###############################################################################
-    def Compare2Themself(self,target_id, start_year = 2010):
+    def Compare2Themself(self,target_id, start_year = 2010,DataSource):
         '''
         辅助函数：获取target_id从2010年开始直到去年的财务数据，形成DataFrame并输出（用户不必关心）
         输入：开始时间（可选）
@@ -212,9 +212,9 @@ class CoreAnalyse:
         print('get self report data...')
         for year in range(start_year, datetime.now().year):
             try:
-                if  self.DataSource == 'SQL':
+                if  DataSource == 'SQL':
                     a = GetItemInfo.GetSingleItem(target_id,year)
-                elif  self.DataSource == 'CSV':
+                elif  DataSource == 'CSV':
                     a = GetItemInfo.GetSingleLocalItem(target_id,year)
                 else:
                     print('compare failure. bad parameter')
@@ -228,7 +228,7 @@ class CoreAnalyse:
         result = pd.DataFrame(result,index = index_id)
         return result
 
-    def Compare2Industry(self,company):
+    def Compare2Industry(self,company,DataSource):
         '''
         辅助函数：获取配置文件中所指代公司的上一年年报数据，用于同行业对比（用户不必关心）
         输入：行业对比
@@ -239,9 +239,9 @@ class CoreAnalyse:
         print('get compare report data...')
         for individual in company:
             try:
-                if  self.DataSource == 'SQL':
+                if  DataSource == 'SQL':
                     a = GetItemInfo.GetSingleItem(individual,datetime.now().year - 1)
-                elif  self.DataSource == 'CSV':
+                elif  DataSource == 'CSV':
                     a = GetItemInfo.GetSingleLocalItem(individual,datetime.now().year - 1)
                 else:
                     print('compare failure. bad parameter')
@@ -297,7 +297,7 @@ class CoreAnalyse:
         rate = df.iloc[-1][target] / df.iloc[-1][base]
         return round(rate,3)
 
-    def FileOutGrowth(self,fh, comment, avg, last, level):
+    def ileOutGrowth(self,fh, comment, avg, last, level):
         fh.write(comment)
         fh.write(str(avg) + ',' + str(last) + '\t')
         if avg > 0.2:

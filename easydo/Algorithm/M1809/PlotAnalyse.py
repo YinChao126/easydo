@@ -6,7 +6,7 @@ Created on Tue July 24 08:26:21 2018
 """
 
 import numpy as np
-import CoreAnalyse
+# import CoreAnalyse
 from matplotlib import pyplot as plt
 
 
@@ -53,6 +53,7 @@ def PlotAnalyse(data):
     plt.rcParams['axes.unicode_minus'] = False
 
     # 资产水平分析
+    CoreAnalyse = CoreAnalyse()
     avg, last, level = CoreAnalyse.GetGrowth(data, 0)  # 总资产_复合增长率
     avg_, last_, level_ = CoreAnalyse.GetGrowth(data, 1)  # 净资产_复合增长率
     rate = CoreAnalyse.GetRate(data, 3, 0)  # 流动资产_总资产占比
