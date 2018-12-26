@@ -6,7 +6,7 @@ from datetime import datetime
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from crawling_finance_table_v1_7 import crawling_finance
-from CoreAnalyse import Compare2Themself,Compare2Industry,data_normalize
+from CoreAnalyse import CoreAnalyse
 
 class M1809:
     def __init__(self,company_id_list,DataSource='SQL',LocalStore = 'ON'):
@@ -84,9 +84,10 @@ class M1809:
         
 
     def M1809_GetData(self):
-        self_result = Compare2Themself(self.company_id_list[0])  #自身对比
-        b1 = Compare2Industry(self.company_id_list)  #同行业对比
-        compare_result = data_normalize(b1)  #归一化的同行业对比
+        AnalyseObj = CoreAnalyse(self.DataSource)
+        self_result = AnalyseObj.Compare2Themself(self.company_id_list[0])  #自身对比
+        b1 =  AnalyseObj.Compare2Industry(self.company_id_list)  #同行业对比
+        compare_result =  AnalyseObj.data_normalize(b1)  #归一化的同行业对比
         if self.LocalStore == 'ON':
             self_result.to_csv('../output/compare_self.csv', encoding='gbk')
             b1.to_csv('../output/compare_industry.csv', encoding='gbk')

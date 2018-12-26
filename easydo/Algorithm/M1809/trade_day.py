@@ -9,6 +9,7 @@ Created on Sun May 20 16:23:28 2018
 import urllib.request as request  
 import datetime 
 import time 
+import requests
 '''  
 @query a single date: string '20170401';  
 @api return day_type: 0 workday 1 weekend 2 holiday -1 err  
@@ -25,12 +26,14 @@ def get_day_type(query_date):
     http://tool.bitefu.net/jiari/?d=20181001  返回2（国庆节）
     '''
     url = 'http://tool.bitefu.net/jiari/?d=' + query_date  
-    resp = request.urlopen(url)  
-    content = resp.read()  
+#    resp = request.urlopen(url)  
+#    content = resp.read()  
+    resp = requests.get(url)
+    content = resp.text
     if content:  
         try:  
             day_type = int(content)  
-        except ValueError: 
+        except ValueError:  
             return -1  
         else:  
             return day_type  
@@ -73,6 +76,7 @@ def is_tradeday(query_date):
         return 1  
     else:  
         return 0  
+
   
   
 def today_is_tradeday():
@@ -84,5 +88,9 @@ def today_is_tradeday():
   
   
 if __name__ == '__main__':  
-    print(is_tradeday('20171229'))  
-    print(today_is_tradeday()) 
+#    print(is_tradeday('20171229'))  
+#    print(today_is_tradeday()) 
+#    get_day_type('20171229')
+#    contend = request.urlopen("https://www.baidu.com")
+    contend = requests.get("http://tool.bitefu.net/jiari/?d=20181001")
+    print (contend.text)

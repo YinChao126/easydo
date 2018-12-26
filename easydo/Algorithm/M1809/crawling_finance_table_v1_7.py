@@ -344,7 +344,7 @@ class crawling_finance:
 
 
 if __name__ == '__main__':
-    path = './easydo/Algorithm/Fundamentals/history_data/'
+    path = '../history_data/'
     cbfx = crawling_finance(path,'600660')
     cbfx.crawling_update()
     
