@@ -361,33 +361,6 @@ class CoreAnalyse:
         fh.write('**综合结论与评级报告**\n')
         fh.write('--------------------------------------------\n')
 
-    # 以下均为辅助函数，用户不用关心
-    def Compare2Themself(self, target_id, DataSource, start_year=2010):
-        '''
-        辅助函数：获取target_id从2010年开始直到去年的财务数据，形成DataFrame并输出（用户不必关心）
-        输入：开始时间（可选）
-        输出：DataFrame形式的结果
-        '''
-        result = []
-        index_id = []
-        print('get self report data...')
-        for year in range(start_year, datetime.now().year):
-            try:
-                if DataSource == 'SQL':
-                    a = GetItemInfo.GetSingleItem(target_id, year)
-                elif DataSource == 'CSV':
-                    a = GetItemInfo.GetSingleLocalItem(target_id, year)
-                else:
-                    print('compare failure. bad parameter')
-                    return
-                result.append(a)
-                index_id.append(year)
-            except Exception as e:
-                print(e)
-                print('pass ', str(year))
-                pass
-        result = pd.DataFrame(result, index=index_id)
-        return result
 
     def Compare2Industry(self, company, DataSource):
         '''

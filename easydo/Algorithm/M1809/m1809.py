@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 文档说明
 '''
@@ -15,8 +16,8 @@ class M1809:
         self.DataSource = DataSource
         self.LocalStore = LocalStore
         self.BasePath = '.\\easydo\\Algorithm\\M1809'
-        self.HstPath = os.path.join(self.BasePath, "history_data")
-        self.OutPath = os.path.join(self.BasePath, "output")
+        self.HstPath = os.path.join(self.BasePath, "history_data") # 历史数据路径
+        self.OutPath = os.path.join(self.BasePath, "output")  # 输出文档路径
         self.AnalyseObj = CoreAnalyse()
         if (DataSource != "SQL" and DataSource != 'sql'):
             self.DataSource = "CSV"  # 从CSV文件中读取数据#从数据库中读取数据
