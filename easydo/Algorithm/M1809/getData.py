@@ -607,6 +607,175 @@ class GetData:
         #    result.to_csv('compare_industry.csv')
         return result
 
+    def data_normalize(self, data):
+        '''
+        辅助函数：同行业输出数据归一化（用户不用管）
+        行业对比前必须把数据归一化处理，否则没法同行业比较
+        '''
+        head = data.columns  #获取表头
+        tag = head[0]
+        #total_assets = data['总资产']
+        total_assets = data[tag]
+
+        tag = head[8]
+        #total_sale = data['营业收入']
+        total_sale = data[tag]
+        result = pd.DataFrame(total_assets)  #形成一个新的DataFrame，之后再添加列
+
+        tag = head[1]  #净资产
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[2]  #资产负债比
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[3]  #流动资产
+        opt = data[tag]
+        opt = round(opt / total_assets, 3)
+        result[tag] = opt
+
+        tag = head[4]  #一年内到期的长期负债
+        opt = data[tag]
+        opt = round(opt / total_assets, 3)
+        result[tag] = opt
+
+        tag = head[5]  #应收款
+        opt = data[tag]
+        opt = round(opt / total_assets, 3)
+        result[tag] = opt
+
+        tag = head[6]  #预收款
+        opt = data[tag]
+        opt = round(opt / total_assets, 3)
+        result[tag] = opt
+
+        tag = head[7]  #存货
+        opt = data[tag]
+        opt = round(opt / total_assets, 3)
+        result[tag] = opt
+
+        tag = head[8]  #营业收入
+        opt = data[tag]
+        opt = round(opt / total_assets, 3)
+        result[tag] = opt
+
+        tag = head[9]  #营业成本
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[10]  #营业税金及附加
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[11]  #财务费用
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[12]  #营业外收入
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[13]  #净利润
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[14]  #除非净利润
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[15]  #营业税金及附加
+        result[tag] = opt
+
+        tag = head[16]  #经营净额
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[17]  #投资净额
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[18]  #筹资净额
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[19]  #汇率影响
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[20]  #现金净增加额
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[21]  #期末现金净额
+        opt = data[tag]
+        opt = round(opt / total_sale, 3)
+        result[tag] = opt
+
+        tag = head[22]  #流动比率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[23]  #资产周转率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[24]  #存货周转率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[25]  #溢价比
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[26]  #市盈率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[27]  #市净率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[28]  #名义净资产收益率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[29]  #实际净资产收益率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[30]  #毛利率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[31]  #营收增长率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[32]  #除非净利润增长率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[33]  #股息率
+        opt = data[tag]
+        result[tag] = opt
+
+        tag = head[34]  #分红率
+        opt = data[tag]
+        result[tag] = opt
+        return result
+
 
 if __name__ == '__main__':
     id_list = ['000651', '000333']
@@ -615,7 +784,9 @@ if __name__ == '__main__':
     getDataObj = GetData("CSV")
     # data1 = getDataObj.GetSingleLocalItem('000651', 2017)
     # print(data1)
-    # # data2 = getDataObj.Compare2Themself('000333')
-    # # print (data2)
+    # data2 = getDataObj.Compare2Themself('000333')
+    # print (data2)
     data3 = getDataObj.Compare2Industry(id_list)
     print(data3)
+    data4 =getDataObj.data_normalize(data3)
+    print (data4)

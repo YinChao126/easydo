@@ -8,6 +8,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from crawling_finance_table_v1_7 import crawling_finance
 from CoreAnalyse import CoreAnalyse
+from getData import GetData
 
 
 class M1809:
@@ -16,7 +17,7 @@ class M1809:
         self.DataSource = DataSource
         self.LocalStore = LocalStore
         self.BasePath = '.\\easydo\\Algorithm\\M1809'
-        self.HstPath = os.path.join(self.BasePath, "history_data") # 历史数据路径
+        self.HstPath = os.path.join(self.BasePath, "history_data")  # 历史数据路径
         self.OutPath = os.path.join(self.BasePath, "output")  # 输出文档路径
         self.AnalyseObj = CoreAnalyse()
         if (DataSource != "SQL" and DataSource != 'sql'):
@@ -89,16 +90,21 @@ class M1809:
         print('finish init!')
 
     def M1809_GetData(self):
-        self_result = self.AnalyseObj.Compare2Themself(self.company_id_list[0],
-                                                       self.DataSource)  # 自身对比
-        # b1 = self.AnalyseObj.Compare2Industry(self.company_id_list,
-        #                                       self.DataSource)  #同行业对比
-        # compare_result = self.AnalyseObj.data_normalize(b1)  #归一化的同行业对比
-        # if self.LocalStore == 'ON':
-        #     self_result.to_csv('../output/compare_self.csv', encoding='gbk')
-        #     b1.to_csv('../output/compare_industry.csv', encoding='gbk')
-        #     compare_result.to_csv('../output/normalize.csv', encoding='gbk')
-        # return self_result, compare_result
+        # self_result = self.AnalyseObj.Compare2Themself(self.company_id_list[0],
+        #    self.DataSource)  # 自身对比
+        GetDataObj = GetData(self.DataSource, self.HstPath)
+        self_result = GetDataObj.Compare2Themself(self.company_id_list[0])
+        b1 = GetDataObj.Compare2Industry(self.company_id_list)  #同行业对比
+        compare_result = GetDataObj.data_normalize(b1)  #归一化的同行业对比
+        if self.LocalStore == 'ON':
+            SelfResultPath = os.path.join(self.OutPath+'\\compare_self.csv')
+            ComparePath = os.path.join(self.OutPath+'\\compare_industry.csv')
+            NomalizePath = os.path.join(self.OutPath+'\\normalize.csv')
+
+            self_result.to_csv(SelfResultPath, encoding='gbk')
+            b1.to_csv(ComparePath, encoding='gbk')
+            compare_result.to_csv(NomalizePath, encoding='gbk')
+        return self_result, compare_result
 
     def M1809_Analyse(self):
         '''
@@ -119,6 +125,7 @@ if __name__ == '__main__':
     company_id_list = ['000651', '000333']
     DataSource = "CSV"
     AObject = M1809(company_id_list, DataSource)
-    AObject.M1809_Init()
-    # AObject.M1809_GetData()
+    # AObject.M1809_Init()
+    self_result, compare_result= AObject.M1809_GetData()
+    print (self_result, compare_result)
     # self_result, compare_result = AObject.M1809_Analyse()
