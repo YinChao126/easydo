@@ -119,6 +119,6 @@ if __name__ == '__main__':
     company_id_list = ['000651', '000333']
     DataSource = "CSV"
     AObject = M1809(company_id_list, DataSource)
-    # AObject.M1809_Init()
-    AObject.M1809_GetData()
+    AObject.M1809_Init()
+    # AObject.M1809_GetData()
     # self_result, compare_result = AObject.M1809_Analyse()

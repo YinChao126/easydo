@@ -67,6 +67,7 @@ def DataTreat(AStr):
         returnNum = float(AStr.replace(',', ''))
     return returnNum
 
+
 BasePath = '.\\easydo\\Algorithm\\M1809'
 hstPath = os.path.join(BasePath, "history_data")  # 历史数据路径
 class GetData:
@@ -293,8 +294,6 @@ class GetData:
         suffix_balnce_sheet = '_balance_sheet.csv'
         suffix_cash_flow = '_cash_flow.csv'
         suffix_profit = '_profit.csv'
-        print (prefix+stock_id+suffix_balnce_sheet)
-        # return
         with open(
                 prefix + stock_id + suffix_balnce_sheet, 'r',
                 encoding='UTF-8') as csvfile:
@@ -314,11 +313,9 @@ class GetData:
         try:
             trash = result_last
         except Exception as e:
-            print(e)
+            print ('except:', e)
             print('没有前一年的记录，请调大输入年份')
 
-    #    print(Config.data_base_path)
-    #    print(result)
         p_len = len(Config.parameter)  #自动计算参数列表长度
         info = []  #实际待填充的字段，最后用于生成Series的value部分
 
@@ -351,13 +348,11 @@ class GetData:
                 data1_last[i] = '0'
         AssetLastYear = DataTreat(data1_last[37])  #总资产
         InventoryLastYear = DataTreat(data1_last[10])  #去年存货
-        #
 
         #    #利润表查询与填充
         with open(prefix + stock_id + suffix_profit, 'r') as csvfile:
             csv_reader = csv.reader(csvfile)  # 使用csv.reader读取csvfile中的文件
             head_parameter = next(csv_reader)  # 读取第一行每一列的标题
-            #        print(head_parameter)
             while True:
                 try:
                     data = next(csv_reader)  # 读取第一行每一列的标题
@@ -396,6 +391,10 @@ class GetData:
         #除非净利润=净利润-非经常性盈利损失
         info[14] = info[13] - NonRecurringProfitAndLoss  #除非净利润
         info[15] = DataTreat(data2[22])  #每股收益
+        if(info[15] <= 0):
+            print ("无法正确计算股本")
+            raise Exception
+            return
         stock_num = info[13] / info[15]  #股份数量
         #上一年度利润表
         data2_last = result_last  #获得资产负债表信息
@@ -510,6 +509,8 @@ class GetData:
         px, Date = get_dividends_history.get_px_single_year(stock_id, year - 1)
         if px == 0.0 or Date == '--':
             info[33] = 0
+        elif px == -1:
+            info[33] =0
         else:
             DatStr = datetime.strptime(Date, '%Y%m%d')
             cnt = 30  #考察连续30个交易日是否有数据
@@ -556,6 +557,9 @@ class GetData:
                 print('except:', e)
                 print('pass ', str(year))
                 pass
+            # a = self.GetSingleLocalItem(target_id, year)
+            # result.append(a)
+            # index_id.append(year)
         result = pd.DataFrame(result, index=index_id)
         return result
 
@@ -567,3 +571,4 @@ if __name__ == '__main__':
     # data1 = getDataObj.GetSingleLocalItem('000333', 2016)
     # print(data1)
     data2 = getDataObj.Compare2Themself('000333')
+    print (data2)

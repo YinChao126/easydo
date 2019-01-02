@@ -125,7 +125,7 @@ def parse_single_year(html,Year):
                 date2=date2[:4]+date2[5:7]+date2[8:]
 #                print(s,'px money is ',px,date2)
                 return px,date2
-        return -1
+        return (-1,-1)
     except:
         print('cannot parse this page')		
 
