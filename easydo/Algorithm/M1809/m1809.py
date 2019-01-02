@@ -19,7 +19,6 @@ class M1809:
         self.BasePath = '.\\easydo\\Algorithm\\M1809'
         self.HstPath = os.path.join(self.BasePath, "history_data")  # 历史数据路径
         self.OutPath = os.path.join(self.BasePath, "output")  # 输出文档路径
-        self.AnalyseObj = CoreAnalyse()
         if (DataSource != "SQL" and DataSource != 'sql'):
             self.DataSource = "CSV"  # 从CSV文件中读取数据#从数据库中读取数据
             if (os.path.exists(self.HstPath)):
@@ -112,9 +111,10 @@ class M1809:
         1. ../output/文件夹下会生成诊断报告
         2. 控制台输出对比图像（之后可以考虑保存图片）
         '''
+        AnalyseObj = CoreAnalyse()
         self_result, compare_result = self.M1809_GetData()
-        self.AnalyseObj.Analyse(self_result, compare_result)
-        PlotAnalyse.PlotAnalyse(self_result)
+        AnalyseObj.Analyse(self_result, compare_result,self.company_id_list[0])
+        AnalyseObj.PlotAnalyse(self_result)
 
     def M1809_Run(self):
         self.M1809_Init()
@@ -126,6 +126,6 @@ if __name__ == '__main__':
     DataSource = "CSV"
     AObject = M1809(company_id_list, DataSource)
     # AObject.M1809_Init()
-    self_result, compare_result= AObject.M1809_GetData()
-    print (self_result, compare_result)
-    # self_result, compare_result = AObject.M1809_Analyse()
+    # self_result, compare_result= AObject.M1809_GetData()
+    # print (self_result, compare_result)
+    AObject.M1809_Analyse()

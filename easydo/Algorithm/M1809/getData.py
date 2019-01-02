@@ -52,7 +52,6 @@ import re
 import urllib.request
 import numpy as np
 np.set_printoptions(suppress=True)
-import Config
 import trade_day
 import csv
 import os
@@ -79,13 +78,48 @@ class GetData:
         else:
             self.DataSource = 'SQL'
         self.HstPath = HstPath
-        pass
+        self.parameter = [
+            '总资产',
+            '净资产',
+            '资产负债比',
+            '流动资产',
+            '一年内到期的长期负债',
+            '应收账款',
+            '预收账款',
+            '存货',
+            '营业收入',
+            '营业成本',
+            '营业税金及附加',
+            '财务费用',
+            '营业外收入',
+            '净利润',
+            '除非净利润',
+            '每股收益',
+            '经营净额',
+            '投资净额',
+            '筹资净额',
+            '汇率影响',
+            '现金净增加额',
+            '期末现金余额',
+            '流动比率',
+            '资产周转率',
+            '存货周转率',
+            '溢价比',
+            '市盈率',
+            '市净率',
+            '名义净资产收益率',
+            '真实净资产收益率',
+            '毛利率',
+            '营收增长率',
+            '除非净利润增长率',
+            '股息率',
+            '分红率']
 
     # def GetSingleItem(self, stock_id, year):
     # '''
     # 返回一个series
     # '''
-    #     p_len = len(Config.parameter) #自动计算参数列表长度
+    #     p_len = len(self.parameter) #自动计算参数列表长度
     #     info = []   #实际待填充的字段，最后用于生成Series的value部分
 
     #     for s in range(p_len):
@@ -273,7 +307,7 @@ class GetData:
     # #    info[33] = round(float(px) / 10 / float(cur_price),3)
     #     info[34] = round(float(px) / 10 / info[15],3)
     #     #print(pd.Series(info,index = para))
-    #     return pd.Series(info,index = Config.parameter)
+    #     return pd.Series(info,index = self.parameter)
 
     def GetSingleLocalItem(self, stock_id, year, quarter=4):
         if quarter == 1:
@@ -318,7 +352,7 @@ class GetData:
             print('except:', e)
             print('没有前一年的记录，请调大输入年份')
 
-        p_len = len(Config.parameter)  #自动计算参数列表长度
+        p_len = len(self.parameter)  #自动计算参数列表长度
         info = []  #实际待填充的字段，最后用于生成Series的value部分
 
         for s in range(p_len):
@@ -531,7 +565,7 @@ class GetData:
     #    info[33] = round(float(px) / 10 / float(cur_price),3)
         info[34] = round(float(px) / 10 / info[15], 3)
         #print(pd.Series(info,index = para))
-        return pd.Series(info, index=Config.parameter)
+        return pd.Series(info, index=self.parameter)
 
     # 以下均为辅助函数，用户不用关心
 

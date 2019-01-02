@@ -11,16 +11,11 @@ import time
 import matplotlib.pyplot as plt
 #from pylab import *
 #mpl.rcParams['font.sans-serif'] = ['SimHei']
-import GetItemInfo
-import Config
 import txttoexcel
 import numpy as np
 
 
 class CoreAnalyse:
-    # def __init__(self,DataSource="SQL"):
-    #     self.DataSource = DataSource
-
     # 绘制分组柱状图的函数
     def groupedbarplot(self, ax, x_data, x_data_name, y_data_list,
                        y_data_names, colors, x_label, y_label, title):
@@ -52,7 +47,7 @@ class CoreAnalyse:
         ax.legend(loc='upper right')
 
     # 4. 绘图分析
-    def PlotAnalyse(data):
+    def PlotAnalyse(self, data):
         '''
         个股纵向对比绘图逻辑
         '''
@@ -70,11 +65,10 @@ class CoreAnalyse:
         plt.rcParams['axes.unicode_minus'] = False
 
         # 资产水平分析
-        CoreAnalyse = CoreAnalyse()
-        avg, last, level = CoreAnalyse.GetGrowth(data, 0)  # 总资产_复合增长率
-        avg_, last_, level_ = CoreAnalyse.GetGrowth(data, 1)  # 净资产_复合增长率
-        rate = CoreAnalyse.GetRate(data, 3, 0)  # 流动资产_总资产占比
-        debt_avg, debt_last = CoreAnalyse.GetAverage(data, 2)  # 资产负债比_平均水平
+        avg, last, level = self.GetGrowth(data, 0)  # 总资产_复合增长率
+        avg_, last_, level_ = self.GetGrowth(data, 1)  # 净资产_复合增长率
+        rate = self.GetRate(data, 3, 0)  # 流动资产_总资产占比
+        debt_avg, debt_last = self.GetAverage(data, 2)  # 资产负债比_平均水平
 
         x1 = data.iloc[:, [0]].index.tolist()
         x2 = np.arange(4)
@@ -89,7 +83,7 @@ class CoreAnalyse:
         axs[0].set_xlabel('年份')
         axs[0].legend(loc='upper left')
 
-        groupedbarplot(
+        self.groupedbarplot(
             axs[1],
             x_data=x2,
             x_data_name=x2_data_name,
@@ -101,13 +95,13 @@ class CoreAnalyse:
             title='资产水平分析')
 
         # 经营质量分析
-        avg1, last1, _ = CoreAnalyse.GetGrowth(data, 8)  # 营业收入_复合增长率
-        avg2, last2 = CoreAnalyse.GetAverage(data, 30)  # 毛利率
-        avg3, last3, _ = CoreAnalyse.GetGrowth(data, 14)  # 除非净利润
-        avg4, last4, _ = CoreAnalyse.GetGrowth(data, 10)  # 营业税
-        rate = CoreAnalyse.GetRate(data, 12, 8)  # 现金与净资产的占比关系
-        avg5, last5 = CoreAnalyse.GetAverage(data, 33)  #股息率
-        avg6, last6 = CoreAnalyse.GetAverage(data, 34)  #分红率
+        avg1, last1, _ = self.GetGrowth(data, 8)  # 营业收入_复合增长率
+        avg2, last2 = self.GetAverage(data, 30)  # 毛利率
+        avg3, last3, _ = self.GetGrowth(data, 14)  # 除非净利润
+        avg4, last4, _ = self.GetGrowth(data, 10)  # 营业税
+        rate = self.GetRate(data, 12, 8)  # 现金与净资产的占比关系
+        avg5, last5 = self.GetAverage(data, 33)  #股息率
+        avg6, last6 = self.GetAverage(data, 34)  #分红率
 
         x1 = np.arange(3)
         x1_data_name = ['现金/净资产', '股息率', '分红率']
@@ -117,7 +111,7 @@ class CoreAnalyse:
         y2 = [[avg1, avg2, avg3, avg4], [last1, last2, last3, last4]]
 
         _, axs = plt.subplots(2, 1, figsize=(14, 14))
-        groupedbarplot(
+        self.groupedbarplot(
             axs[0],
             x_data=x1,
             x_data_name=x1_data_name,
@@ -128,7 +122,7 @@ class CoreAnalyse:
             y_label='增幅比例',
             title='经营质量分析')
 
-        groupedbarplot(
+        self.groupedbarplot(
             axs[1],
             x_data=x2,
             x_data_name=x2_data_name,
@@ -140,17 +134,17 @@ class CoreAnalyse:
             title='经营质量分析')
 
         # 现金流分析
-        avg1, last1, _ = CoreAnalyse.GetGrowth(data, 16)  # 营业现金
-        avg2, last2, _ = CoreAnalyse.GetGrowth(data, 20)  # 增加的现金
-        avg3, last3, _ = CoreAnalyse.GetGrowth(data, 21)  # 期末现金
-        rate = CoreAnalyse.GetRate(data, 21, 1)  # 现金与净资产的占比关系
+        avg1, last1, _ = self.GetGrowth(data, 16)  # 营业现金
+        avg2, last2, _ = self.GetGrowth(data, 20)  # 增加的现金
+        avg3, last3, _ = self.GetGrowth(data, 21)  # 期末现金
+        rate = self.GetRate(data, 21, 1)  # 现金与净资产的占比关系
 
         x1 = np.arange(4)
         x1_data_name = ['营业现金增长率', '现金增长净额', '期末现金', '现金与净资产的占比']
         y1 = [[avg1, avg2, avg3, 0], [last1, last2, last3, rate]]
 
         _, axs = plt.subplots(1, 1, figsize=(10, 7))
-        groupedbarplot(
+        self.groupedbarplot(
             axs,
             x_data=x1,
             x_data_name=x1_data_name,
@@ -162,16 +156,16 @@ class CoreAnalyse:
             title='现金流分析')
 
         # 4.营运质量分析
-        avg1, last1 = CoreAnalyse.GetAverage(data, 22)  # 流动比率
-        avg2, last2 = CoreAnalyse.GetAverage(data, 23)  # 资产周转率
-        avg3, last3 = CoreAnalyse.GetAverage(data, 24)  # 存货周转率
+        avg1, last1 = self.GetAverage(data, 22)  # 流动比率
+        avg2, last2 = self.GetAverage(data, 23)  # 资产周转率
+        avg3, last3 = self.GetAverage(data, 24)  # 存货周转率
 
         x1 = np.arange(3)
         x1_data_name = ['流动比率', '资产周转率', '存货周转率']
         y1 = [[avg1, avg2, avg3], [last1, last2, last3]]
 
         _, axs = plt.subplots(1, 1, figsize=(10, 7))
-        groupedbarplot(
+        self.groupedbarplot(
             axs,
             x_data=x1,
             x_data_name=x1_data_name,
@@ -184,19 +178,18 @@ class CoreAnalyse:
         plt.show()
 
     # API接口函数
-    def Analyse(self, self_data, total_data):
+    def Analyse(self, self_data, total_data, ID):
         '''
         API函数，用户可调用
         直接根据配置信息，从云端获取数据，填充字段，输出txt分析文件，并得到统计分数
         '''
         s = time.strftime("_%Y%m%d")
         s1 = time.strftime("%Y-%m-%d")
-        file_name = '../output/' + '诊断报告_' + Config.company_id_list[
-            0] + s + '.txt'  #形成文件名
+        file_name = '../output/' + '诊断报告_' + ID + s + '.txt'  #形成文件名
         with open(file_name, 'w') as fh:
             fh.write('版本号：V1.0\n')
             fh.write('诊断时间：' + s1 + '\n')
-            fh.write('诊断个股：' + Config.company_id_list[0] + '\n')
+            fh.write('诊断个股：' + ID + '\n')
             self.SelfAnalyse(fh, self_data)  #同比分析并写文件
             self.CompareAnalyse(fh, total_data)  #同行业对比分析并写文件
             self.ComprehensiveResult(fh)  #手动分析部分（不用关心）
@@ -361,7 +354,6 @@ class CoreAnalyse:
         fh.write('**综合结论与评级报告**\n')
         fh.write('--------------------------------------------\n')
 
-
     def GetGrowth(self, data, column):
         '''
         辅助函数：程式化获取年复合增长率和去年的增长率
@@ -478,8 +470,6 @@ class CoreAnalyse:
             fh.write('\n')
 
         return score
-
-    
 
 
 ###############################################################################
