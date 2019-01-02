@@ -118,7 +118,7 @@ class M1809:
 
     def M1809_Run(self):
         self.M1809_Init()
-        self.M1809_Analyse
+        self.M1809_Analyse()
 
 
 if __name__ == '__main__':
@@ -128,4 +128,5 @@ if __name__ == '__main__':
     # AObject.M1809_Init()
     # self_result, compare_result= AObject.M1809_GetData()
     # print (self_result, compare_result)
-    AObject.M1809_Analyse()
+    # AObject.M1809_Analyse()
+    AObject.M1809_Run()
