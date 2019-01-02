@@ -70,9 +70,11 @@ def DataTreat(AStr):
 
 BasePath = '.\\easydo\\Algorithm\\M1809'
 hstPath = os.path.join(BasePath, "history_data")  # 历史数据路径
+
+
 class GetData:
     def __init__(self, DataSource='SQL', HstPath=hstPath):
-        if(DataSource == 'CSV' or DataSource == 'csv'):
+        if (DataSource == 'CSV' or DataSource == 'csv'):
             self.DataSource = 'CSV'
         else:
             self.DataSource = 'SQL'
@@ -296,7 +298,7 @@ class GetData:
         suffix_profit = '_profit.csv'
         with open(
                 prefix + stock_id + suffix_balnce_sheet, 'r',
-                encoding='UTF-8') as csvfile:
+                encoding='gbk') as csvfile:
             csv_reader = csv.reader(csvfile)  # 使用csv.reader读取csvfile中的文件
             head_parameter = next(csv_reader)  # 读取第一行每一列的标题
             while True:
@@ -308,12 +310,12 @@ class GetData:
                         result = data
                         break
                 except Exception as e:
-                    print ('except:', e)
+                    print('except:', e)
                     break
         try:
             trash = result_last
         except Exception as e:
-            print ('except:', e)
+            print('except:', e)
             print('没有前一年的记录，请调大输入年份')
 
         p_len = len(Config.parameter)  #自动计算参数列表长度
@@ -391,8 +393,8 @@ class GetData:
         #除非净利润=净利润-非经常性盈利损失
         info[14] = info[13] - NonRecurringProfitAndLoss  #除非净利润
         info[15] = DataTreat(data2[22])  #每股收益
-        if(info[15] <= 0):
-            print ("无法正确计算股本")
+        if (info[15] <= 0):
+            print("无法正确计算股本")
             raise Exception
             return
         stock_num = info[13] / info[15]  #股份数量
@@ -510,7 +512,7 @@ class GetData:
         if px == 0.0 or Date == '--':
             info[33] = 0
         elif px == -1:
-            info[33] =0
+            info[33] = 0
         else:
             DatStr = datetime.strptime(Date, '%Y%m%d')
             cnt = 30  #考察连续30个交易日是否有数据
@@ -532,6 +534,7 @@ class GetData:
         return pd.Series(info, index=Config.parameter)
 
     # 以下均为辅助函数，用户不用关心
+
     def Compare2Themself(self, target_id, start_year=2010):
         '''
         辅助函数：获取target_id从2010年开始直到去年的财务数据，形成DataFrame并输出（用户不必关心）
@@ -563,12 +566,56 @@ class GetData:
         result = pd.DataFrame(result, index=index_id)
         return result
 
+    def Compare2Industry(self, company):
+        '''
+        辅助函数：获取配置文件中所指代公司的上一年年报数据，用于同行业对比（用户不必关心）
+        输入：行业对比
+        输出：DataFrame形式的结果（最后一行是输入的平均水平）
+        '''
+        result = []
+        index_id = []
+        print('get compare report data...')
+        for individual in company:
+            try:
+                if self.DataSource == 'SQL':
+                    # a = GetItemInfo.GetSingleItem(individual,
+                    #                               datetime.now().year - 1)
+                    pass
+                elif self.DataSource == 'CSV':
+                    a = self.GetSingleLocalItem(individual,
+                                                datetime.now().year - 1)
+                else:
+                    print('compare failure. bad parameter')
+                    return
+                result.append(a)
+                index_id.append(individual)
+            except Exception as e:
+                if self.DataSource == 'SQL':
+                    # a = GetItemInfo.GetSingleItem(individual,
+                    #                               datetime.now().year - 1)
+                    pass
+                elif self.DataSource == 'CSV':
+                    a = self.GetSingleLocalItem(individual,
+                                            datetime.now().year - 2)
+                else:
+                    print('compare failure. bad parameter')
+                    return
+                result.append(a)
+                index_id.append(individual)
+        result = pd.DataFrame(result, index=index_id)
+        result.loc['avarage'] = result.apply(lambda x: x.sum() / len(index_id))
+        #    result.to_csv('compare_industry.csv')
+        return result
+
 
 if __name__ == '__main__':
+    id_list = ['000651', '000333']
     BasePath = '.\\easydo\\Algorithm\\M1809'
     HstPath = os.path.join(BasePath, "history_data")  # 历史数据路径
     getDataObj = GetData("CSV")
-    # data1 = getDataObj.GetSingleLocalItem('000333', 2016)
+    # data1 = getDataObj.GetSingleLocalItem('000651', 2017)
     # print(data1)
-    data2 = getDataObj.Compare2Themself('000333')
-    print (data2)
+    # # data2 = getDataObj.Compare2Themself('000333')
+    # # print (data2)
+    data3 = getDataObj.Compare2Industry(id_list)
+    print(data3)

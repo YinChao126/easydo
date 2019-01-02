@@ -362,36 +362,6 @@ class CoreAnalyse:
         fh.write('--------------------------------------------\n')
 
 
-    def Compare2Industry(self, company, DataSource):
-        '''
-        辅助函数：获取配置文件中所指代公司的上一年年报数据，用于同行业对比（用户不必关心）
-        输入：行业对比
-        输出：DataFrame形式的结果（最后一行是输入的平均水平）
-        '''
-        result = []
-        index_id = []
-        print('get compare report data...')
-        for individual in company:
-            try:
-                if DataSource == 'SQL':
-                    a = GetItemInfo.GetSingleItem(individual,
-                                                  datetime.now().year - 1)
-                elif DataSource == 'CSV':
-                    a = GetItemInfo.GetSingleLocalItem(individual,
-                                                       datetime.now().year - 1)
-                else:
-                    print('compare failure. bad parameter')
-                    return
-                result.append(a)
-                index_id.append(individual)
-            except:
-                print('drop ', individual, '\'s report')
-                pass
-        result = pd.DataFrame(result, index=index_id)
-        result.loc['avarage'] = result.apply(lambda x: x.sum() / len(index_id))
-        #    result.to_csv('compare_industry.csv')
-        return result
-
     def GetGrowth(self, data, column):
         '''
         辅助函数：程式化获取年复合增长率和去年的增长率
