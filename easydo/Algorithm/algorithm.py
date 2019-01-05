@@ -53,14 +53,34 @@ class algorithm:
             eps = tbl.iloc[-1]['eps']
         avg_growth = ts_app.AvgGrowthInfo(ID,5)#过去5年eps平均增长率，财报爬取
         turnover, avg_pe, avg_pb = ts_app.AvgExchangeInfo(ID, 3)#过去3年平均PE、换手率
-        cur_price = ts_app.GetPrice(ID) #现价，直接爬取
+        
+        basic = ts_app.BasicInfo(ID) #最近收盘的基本情况
+        cur_pe= basic.iloc[-1]['pe']
+        cur_price = basic.iloc[-1]['close']
+#        print(basic)
+        
+        #成长型股票PE修正
+        if avg_growth > 0.5: #50%以上算高增长，PE打6折，此时的PE不靠谱！
+            avg_pe *= 0.6
+        elif avg_growth > 0.3: #30%以上算中高速增长，PE打8折
+            avg_pe *= 0.8
+        elif avg_growth > 0.15: #15%以上算中速,PE打9折
+            avg_pe *= 0.9
 
         #2.中间变量计算
+        '''
+        1.计算增长率：过去5年的平均增长率和预测的今年增长率加权
+        2.根据平均5年pe_ttm的水平结合现价，得到预测的价格
+        3.根据现价和预测价格推测出溢价水平
+        '''
+        
         confidence = 0.2 + confidence * 0.6#实际权值范围[0.2-0.8]，防止过分自信和悲观
         growth = avg_growth * (1-confidence) + est_growth * confidence
-        est_eps = eps * (1+growth)
-        est_price = round(est_eps * avg_pe, 2)
-        print('年末估计值：',est_price)
+        est_price = cur_price / cur_pe * avg_pe * (1+growth)
+        overflow_rate = (cur_price - est_price) / est_price
+        
+        print('平均PE:',avg_pe,'平均增长率：',avg_growth,'增长率加权:',round(growth,4))
+        print('现价:',cur_price,'年末估计值：',est_price)
         
         '''
         市值表现核对，估值溢价计算与投资建议
@@ -74,8 +94,6 @@ class algorithm:
         [ ~ -0.20] 绝对低估，  【满仓】
         返回值表示：溢价水平[-3,-2,-1,0,1,2,3]从低估到高估排列
         '''  
-        overflow_rate = (cur_price - est_price) / est_price
-    #    print(overflow_rate)
         
         flow_level = 0 #溢价水平
         if overflow_rate > 0.2:

@@ -25,7 +25,11 @@ if __name__ == '__main__':
 
     #测试：获得股票估值水平
     app = TushareApp.ts_app()
-    test = alg.algorithm.Estimation('601012.SH',0.15)
+    test = alg.algorithm.Estimation('601012.SH', 0.0, 1)
+    
+#    #测试：获得个股前一天的基本情况
+#    app = TushareApp.ts_app()
+#    test = app.BasicInfo('600377.SH')
     
 #    test = User.user.cUser('sss', '123')
 #    test.Login('s', 'a')

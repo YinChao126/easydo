@@ -25,11 +25,11 @@ class ts_app:
     功能：利用tushare_pro数据接口实现的相关应用功能
     更新时间：2010-1-1
     应用函数一览表：
+    BasicInfo:获得指定个股最新的基础情况（收盘价、PE、换手率、股本数等）（非常重要）
     GetPrice:获得指定个股指定一天的收盘价，如果当天没有则自动往前找
     GetOneYearFinanceTable:获得指定个股指定一年的财务统计数据
     GetFinanceTable:获得指定个股连续n年的年度财务统计数据（非常重要）
     
-    平均水平
     AvgExchangeInfo:平均交易参数（换手率、PE_TTM、PB） （非常重要）
     AvgBasicInfo:平均财务指标（roe, 资产负债率）（非常重要）
     AvgGrowthInfo:增长指标（营收增长率、净利润增长率）（非常重要）
@@ -154,6 +154,27 @@ class ts_app:
         data.drop_duplicates(subset=['end_date'],keep='first',inplace=True)
         return data
     
+    def BasicInfo(self, ID):
+        '''
+        输入一个个股和开始日期，获得一个DataFrame格式基本情况列表
+        @输入：
+        ID(str) 
+        start_day(str) 开始时间： '20100101'
+        @返回：DataFrame格式数据的基础信息
+        
+        备注：该函数为辅助函数，用户禁止调用
+        '''
+        stop_day = datetime.now()
+        cnt = 200
+        while cnt > 0: #获得第一天
+            day = TimeConverter.dtime2str(stop_day)
+            data = self.pro.daily_basic(ts_code=ID, trade_date=day, fields='trade_date, ts_code, close, turnover_rate,pe, pe_ttm,pb,total_share')
+            stop_day -= timedelta(1)
+            cnt -= 1
+            if data.empty != True:
+                return data
+        return 0
+        
     def _DailyRecord(self, ID, start_day):
         '''
         输入一个个股和开始日期，获得一个DataFrame格式基本情况列表
@@ -330,7 +351,7 @@ class ts_app:
 #        print(df_result)
 #        return
         if df_result.empty == True:
-            print('没有这条记录，重新更新')
+#            print('没有这条记录，重新更新')
             today = datetime.now()
             default_data = {'id':id_str,
                             'year':years,
@@ -366,7 +387,7 @@ class ts_app:
 #            print(records)
             records.to_csv(file_name,index =False)
         else:
-            print('已有记录，直接在原有基础上更新即可')
+#            print('已有记录，直接在原有基础上更新即可')
             '''
             此处有bug
             loc[0,'xxx']已经变了，首次是0，之后都是1了。。
