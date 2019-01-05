@@ -29,10 +29,10 @@ class ts_app:
     GetOneYearFinanceTable:获得指定个股指定一年的财务统计数据
     GetFinanceTable:获得指定个股连续n年的年度财务统计数据（非常重要）
     GetAvgInfo:根据日k线统计连续n年的平均换手率、平均PE和平均PB水平（非常重要）
+    update：一次性更新avg_info.csv文件
     
     备注：
     1. 财务统计表的item可以通过修改fields属性(详情请看最后面的附录或官网解释)
-    2. 获得的平均水平会自动存为本地文档并自动更新，除非手动删除文档（暂未实现）
     '''
     def __init__(self):
         '''
@@ -45,7 +45,7 @@ class ts_app:
         append_table = ['dt_eps_yoy','op_yoy'] #自主添加
         self.fields += append_table
     
-        self.avg_fields = ['trade_date,turnover_rate,pe_ttm,pb'] #平均水平检查项目
+        self.save_path = './avg_info.csv'
     def GetPrice(self, ID,cur_day = 0):
         '''
         获取指定一天的收盘价，默认获取最近一天的价格
@@ -187,7 +187,27 @@ class ts_app:
         data.index = range(len(data))
         return data
     
-    def GetAvgInfo(self, ID,start_day):
+    def GetAvgInfo(self, ID, years):
+        '''
+        输入一个个股，获得其基本的参数，平均换手率，平均静态市盈率，平均pb值
+        备注：数据来源于avg_info.csv
+        @输入：
+        @ID(str)->个股ID号    years(int)->平均几年的水平
+        输出：平均换手率、平均PE_TTM、平均PB(均为float类型)
+        '''
+        self.update_one(ID, years)
+        content = pd.read_csv(self.save_path)
+        try:
+            item = content[(content.id == ID) & (content.year == years)]
+            turnover = item.iloc[-1]['turnover']
+            pe = item.iloc[-1]['pe']
+            pb = item.iloc[-1]['pb']
+            return turnover, pe, pb
+        except:
+            return 0, 0, 0
+        
+        
+    def _GetAvgInfo(self, ID,start_day):
         '''
         输入一个个股，获得其基本的参数，平均换手率，平均静态市盈率，平均pb值
         备注：数据来源于tushare
@@ -252,15 +272,34 @@ class ts_app:
         avg_turnover = round(turnover.mean(),2)
         avg_pb = round(pb.mean(),2)
         return avg_turnover, avg_pe, avg_pb
-
-    def update(self, id_str, years):
+    
+    def update(self):
         '''
-        更新平均水平
+        更新agv_info.csv到最近一天
+        '''
+        today = datetime.now()
+        content = pd.read_csv(self.save_path)
+        for i in range(len(content)):
+            item = content.loc[i]
+            stop_day = item['stop_day']
+            if TimeConverter.is_equal(today, stop_day) == True:
+                continue
+            id_str = item['id']
+            years = item['year']
+            self.update_one(id_str, years)
+            
+    def update_one(self, id_str, years):
+        '''
+        辅助函数，用户禁止调用
+        描述：更新单条记录到最近一天
         csv文件定义：
         文件名：avg_info.csv
         字段： id, year, days, stop_day, turnover, pe, pb
         '''
-        file_name = 'avg_info.csv'
+        if len(id_str) != 9 or isinstance(id_str, str) == False or years < 1:
+            print('输入非法')
+            return
+        file_name = self.save_path
         header = ['id','year','days','stop_day','turnover','pe','pb']
         try:
             records = pd.read_csv(file_name)
@@ -283,13 +322,13 @@ class ts_app:
                             'pb':0.0}
             index_name = len(records)
             item = pd.DataFrame(default_data,index=[index_name])
-            print(item)
+#            print(item)
             
             update_day = today - timedelta(years * 365)
 #            update_day = today - timedelta(10)
-            print(update_day, today)
+#            print(update_day, today)
             append_list = self._DailyRecord(id_str,TimeConverter.dtime2str(update_day))
-            print(append_list)
+#            print(append_list)
             new_turnover = round(append_list['turnover_rate'].mean(),2)
             new_pe = round(append_list['pe_ttm'].mean(),2)
             new_pb = round(append_list['pb'].mean(),2)
@@ -298,14 +337,14 @@ class ts_app:
             item.loc[index_name,'turnover'] = new_turnover
             item.loc[index_name,'pe']=new_pe
             item.loc[index_name,'pb'] = new_pb
-            print(new_turnover,new_pe,new_pb,total_day)
-            print('更新前')
-            print(records)
+#            print(new_turnover,new_pe,new_pb,total_day)
+#            print('更新前')
+#            print(records)
             records = pd.concat([records,item])
 #            records = records.sort_index()
             records = records.sort_values(by=['id','year'])
-            print('更新后')
-            print(records)
+#            print('更新后')
+#            print(records)
             records.to_csv(file_name,index =False)
         else:
             print('已有记录，直接在原有基础上更新即可')
@@ -340,23 +379,25 @@ class ts_app:
             #获得更新列
             update_item = df_result.copy()
 #            index_name = df_result.index.tolist()[0]
-            print(update_item)
+#            print(update_item)
             update_item.loc[index_name,'stop_day']=TimeConverter.dtime2str(today,'/')
             update_item.loc[index_name,'turnover']=new_turnover
             update_item.loc[index_name,'pe']=new_pe
             update_item.loc[index_name,'pb'] = new_pb
-            print(update_item)
+#            print(update_item)
             
         
             #更新原有的records
-            print('更新前')
-            print(records)
-            records = records[(records.id == id_str) & (records.year != years)]
+#            print('更新前')
+#            print(records)
+            drop_item = records[(records.id == id_str) & (records.year == years)]
+            drop_index = drop_item.index.tolist()[0]
+            records = records.drop([drop_index])
             records = pd.concat([records,update_item])
 #            records = records.sort_index()
             records = records.sort_values(by=['id','year'])
-            print('更新后')
-            print(records)
+#            print('更新后')
+#            print(records)
             records.to_csv(file_name,index =False)
         
 #b = pro.fina_indicator(ts_code='600660.SH') #获取所有财务指标
@@ -531,9 +572,9 @@ if __name__ == '__main__':
     
     b = app.GetPrice(l,'19000101')
     print(b)
-    app.update(l,2)
+    app.update_one(l,2)
     for s in range(1,6):
-        app.update(id_str,s)
+        app.update_one(id_str,s)
     
 #    a = app._DailyRecord(l,'20181220')
 #    print(a)
