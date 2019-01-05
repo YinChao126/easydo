@@ -25,11 +25,6 @@ class algorithm:
         输入：投资额， 目标个股
         输出：股票投资比率， 建议重点投资的股票组合
         '''
-        # cur_workspace = os.getcwd()
-        # sys.path.append(cur_workspace+'\Algorithm')
-        # print(os.getcwd())
-        # import stock_bond_rate
-
         rate = stock_bond_rate.GetStockRate() #获取股债比
         advise_list = stock_list[:2]
         stock_money = money * rate
@@ -50,22 +45,22 @@ class algorithm:
         @ flow_level(int) -> 溢价等级[-3,3],详见下文的溢价表定义
         '''
         #1.参数输入
-        avg_pe = 15.2 #十年平均除非市盈率，通过乌龟量化爬取，或者直接通过财报计算得来
-        eps = 3.72 #去年除非每股收益，财报爬取即可
-        avg_growth = 0.2#过去5年eps平均增长率，财报爬取
         ts_app = TushareApp.ts_app()
+        eps = 0.72 #去年除非每股收益，财报爬取即可
+        tbl = ts_app.GetFinanceTable(ID,1)
+        eps = tbl.iloc[-1]['dt_eps']
+        if not eps: #如果没有除非eps，则用eps代替
+            eps = tbl.iloc[-1]['eps']
+        avg_growth = ts_app.AvgGrowthInfo(ID,5)#过去5年eps平均增长率，财报爬取
+        turnover, avg_pe, avg_pb = ts_app.AvgExchangeInfo(ID, 3)#过去3年平均PE、换手率
         cur_price = ts_app.GetPrice(ID) #现价，直接爬取
-        
-        
-        
+
         #2.中间变量计算
         confidence = 0.2 + confidence * 0.6#实际权值范围[0.2-0.8]，防止过分自信和悲观
-        print(confidence)
         growth = avg_growth * (1-confidence) + est_growth * confidence
-        print(growth)
         est_eps = eps * (1+growth)
-        est_price = est_eps * avg_pe
-        print(est_price)
+        est_price = round(est_eps * avg_pe, 2)
+        print('年末估计值：',est_price)
         
         '''
         市值表现核对，估值溢价计算与投资建议
@@ -98,7 +93,7 @@ class algorithm:
         else:
             flow_level = -3
         
-        print(flow_level)
+        print('参考溢价等级：',flow_level)
         return est_price, flow_level
 
 if __name__ == '__main__':

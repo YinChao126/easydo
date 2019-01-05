@@ -28,7 +28,11 @@ class ts_app:
     GetPrice:获得指定个股指定一天的收盘价，如果当天没有则自动往前找
     GetOneYearFinanceTable:获得指定个股指定一年的财务统计数据
     GetFinanceTable:获得指定个股连续n年的年度财务统计数据（非常重要）
-    GetAvgInfo:根据日k线统计连续n年的平均换手率、平均PE和平均PB水平（非常重要）
+    
+    平均水平
+    AvgExchangeInfo:平均交易参数（换手率、PE_TTM、PB） （非常重要）
+    AvgBasicInfo:平均财务指标（roe, 资产负债率）（非常重要）
+    AvgGrowthInfo:增长指标（营收增长率、净利润增长率）（非常重要）
     update：一次性更新avg_info.csv文件
     
     备注：
@@ -40,9 +44,9 @@ class ts_app:
         fields建议不要改动，自定义的字段请在append_table中添加
         '''
         self.pro = ts.pro_api('dbc6483be88b981e2445a2f20e8c6e8566b59191646f054345247bc0')
-        self.fields = ['ts_code','end_date','roe_yearly','dt_eps','bps','cfps',
+        self.fields = ['ts_code','end_date','roe_yearly','eps','dt_eps','bps','cfps',
                    'debt_to_assets','ebit_of_gr','roe_waa','roa']
-        append_table = ['dt_eps_yoy','op_yoy'] #自主添加
+        append_table = ['basic_eps_yoy','dt_eps_yoy','op_yoy'] #自主添加
         self.fields += append_table
     
         self.save_path = './avg_info.csv'
@@ -71,7 +75,7 @@ class ts_app:
             if cnt < 0:
                 return 0
         price = data.iloc[0]['close']
-        print(ID, day, price)
+#        print(ID, day, price)
         return price
     
     def GetFinanceTable(self, ID, n):
@@ -187,7 +191,7 @@ class ts_app:
         data.index = range(len(data))
         return data
     
-    def GetAvgInfo(self, ID, years):
+    def AvgExchangeInfo(self, ID, years):
         '''
         输入一个个股，获得其基本的参数，平均换手率，平均静态市盈率，平均pb值
         备注：数据来源于avg_info.csv
@@ -206,6 +210,21 @@ class ts_app:
         except:
             return 0, 0, 0
         
+    def AvgGrowthInfo(self, ID, years = 5):
+        '''
+        @描述： 输入一个个股，求得其连续n年的平均增长率水平
+        @输入： ID(str)-> '600660.SH' years(int)->多少年的平均值
+        @返回： growth(float)->平均n年稀释每股收益同比增长率
+        @备注： 该平均水平是加权求平均，越近的权值越大
+        '''
+        data = self.GetFinanceTable(ID, years)
+        g_eps = data['dt_eps_yoy'].mean() #g_eps每股收益增长率
+        g_eps = round(g_eps/100, 4)
+        if g_eps != g_eps: #如果g_eps == nan则算基础eps增长率
+            g_eps = data['basic_eps_yoy'].mean() #g_eps每股收益增长率
+            g_eps = round(g_eps/100, 4)
+        g_op = data['op_yoy'].mean() #g_op营业利润增长率
+        return g_eps
         
     def _GetAvgInfo(self, ID,start_day):
         '''
@@ -567,7 +586,7 @@ if __name__ == '__main__':
     l = '600660.SH'
     id_str = '000651.SZ'
     app = ts_app()
-#    a = app.GetAvgInfo(l, '20181111')
+#    a = app.AvgExchangeInfo(l, '20181111')
 #    print(a)
     
     b = app.GetPrice(l,'19000101')

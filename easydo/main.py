@@ -12,14 +12,20 @@ import Algorithm.algorithm as alg
 
 if __name__ == '__main__':
     id_str = ['000651.SZ', '002597.SZ','600377.SH','600660.SH','601012.SH']
-    app = TushareApp.ts_app()
-    a,b,c = app.GetAvgInfo(id_str[0], 1)
-    print(a,b,c)
-        
-    tbl = app.GetFinanceTable('000651.SZ',6)
-    print(tbl)
+    
+#    #测试：获得个股连续n年平均交易水平（换手率，pe_ttm,pb）
+#    app = TushareApp.ts_app()
+#    a,b,c = app.AvgExchangeInfo(id_str[0], 1)
+#    print(a,b,c)
+    
+#    #测试：获得个股连续n年的财务统计数据
+#    app = TushareApp.ts_app()
+#    tbl = app.GetFinanceTable('000651.SZ',6)
+#    print(tbl)
 
-#    test = alg.algorithm.Estimation('600660.SH',0.3,1)
+    #测试：获得股票估值水平
+    app = TushareApp.ts_app()
+    test = alg.algorithm.Estimation('601012.SH',0.15)
     
 #    test = User.user.cUser('sss', '123')
 #    test.Login('s', 'a')
