@@ -405,8 +405,12 @@ class ts_app:
             if TimeConverter.dtime2str(start_day) == TimeConverter.dtime2str(today):
                 print('already latest')
                 return 0
+            
 #            print('old value:',old_turnover, old_pe, old_pb)
             append_list = self._DailyRecord(id_str,TimeConverter.dtime2str(start_day))
+            if append_list == 0: #最近更新的那一天没有记录（周末或者节假日）
+                print('already latest')
+                return
             turnover_add = append_list['turnover_rate'].sum()
             pe_add = append_list['pe_ttm'].sum()
             pb_add = append_list['pb'].sum()
@@ -417,6 +421,7 @@ class ts_app:
             new_pb = round(((total_day - add_day) * old_pb + pb_add) / total_day, 2)
 #            print(new_turnover, new_pe, new_pb)
             #获得更新列
+        
             update_item = df_result.copy()
 #            index_name = df_result.index.tolist()[0]
 #            print(update_item)
