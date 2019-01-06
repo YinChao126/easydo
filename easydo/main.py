@@ -43,7 +43,7 @@ if __name__ == '__main__':
     a = alg.algorithm.InvestAnalyse(invest_list,start_day,stop_day)
 
 #    #测试：生成策略
-#    stock_list = ['000651.SZ','600522.SH']
+#    stock_list = ['600522.SH','601012.SH']
 #    invest_money = 10000
 #    start = '20180101'
 #    stop = '20181231'

@@ -135,7 +135,6 @@ class algorithm:
         3. stop_day比当前时间更晚，说明设置错误，强制将其置为当天
         4. stop_day比当前时间早，也比最后一条投资历史早，说明只考察某段投资历史
         '''
-#        print(invest_list)
         today = datetime.now()
         start = TimeConverter.str2dtime(start_day)
         stop = TimeConverter.str2dtime(stop_day)
@@ -146,9 +145,9 @@ class algorithm:
             return
         invest_tbl.index = range(len(invest_tbl))
         cur = TimeConverter.str2dtime(invest_tbl.loc[0,'deal_time'])
-        print('step1: 实际起止时间：\n', 'start:',cur, ' --- stop:',stop,'\n')
-        print('step2: 截取invest_list')
-        print(invest_tbl)
+#        print('step1: 实际起止时间：\n', 'start:',cur, ' --- stop:',stop,'\n')
+#        print('step2: 截取invest_list')
+#        print(invest_tbl)
 
 ###############################################################################
         #2. 根据cur，直接向前搜索分红表，得到一个指针数组
@@ -161,17 +160,15 @@ class algorithm:
         stock_len = len(stock_id)
         div_tbl = []   #获得相应的股息表
         div_tbl = pd.DataFrame(columns=['名称','年度','派息','转股','送股','除权日'])
-#        print(div_tbl)
-#        return
         for s in stock_id:
             tmp = ts_app.GetDividendTable(s)
             tbl = tmp[tmp.除权日 >= TimeConverter.dtime2str(cur)]
             div_tbl = pd.concat([div_tbl,tbl])
         div_tbl = div_tbl.sort_values(by=['除权日'])
         div_tbl.index = range(len(div_tbl))
-        print('\nstep3:获得个股名单，并根据分红表和cur，合成分红表')
-        print(stock_id)
-        print(div_tbl)
+#        print('\nstep3:获得个股名单，并根据分红表和cur，合成分红表')
+#        print(stock_id)
+#        print(div_tbl)
 
 ###############################################################################    
         '''
@@ -199,8 +196,8 @@ class algorithm:
             ex_tbl = ex_tbl.append(tmp_dic, ignore_index=True)
         ex_tbl = ex_tbl.sort_values(by=['day'])
         ex_tbl.index = range(len(ex_tbl))
-        print('\nstep4:获得一个按时间顺序执行表ex_tbl，用于快速索引日期')
-        print(ex_tbl)
+#        print('\nstep4:获得一个按时间顺序执行表ex_tbl，用于快速索引日期')
+#        print(ex_tbl)
 
 ###############################################################################
         '''
@@ -218,9 +215,7 @@ class algorithm:
             a = (s, 0)
             stock_num.append(a)
         stock_num = dict(stock_num) 
-        i = 0 #time_index的索引
         excute_time = len(ex_tbl)
-#        print('共有%d条记录'%excute_time,'\n')
         yesterday = cur
         year_asset = [] #年度资产数据，用于计算波动率
         buy_id = 0
@@ -256,25 +251,25 @@ class algorithm:
 #                print('\n\n')
                 div_id += 1
                
-        print('\nstep5:交易完后的结果')
-        print('股份数:',stock_num)
+#        print('\nstep5:交易完后的结果')
+#        print('股份数:',stock_num)
         
 ###############################################################################
         total_asset = 0
         for key in stock_num:
             str_id = key
             num = stock_num[key]
-            print(str_id, num)
             try:
                 price, day= ts_app.GetPrice(str_id)
                 asset = price * num
                 total_asset += asset
             except:
                 pass
-        print('\nstep6:收益统计')
-        print('成本:', round(cost,2), '期末资产：', round(total_asset,2), '额外分红：',ultra_earn)
+            
         total_rate = round((total_asset - cost)/cost, 4)
-        per_rate = round(total_rate / (stop.year - start.year),4)
+        per_rate = round(total_rate / (stop.year - cur.year+1),4)
+#        print('\nstep6:收益统计')
+#        print('成本:', round(cost,2), '期末资产：', round(total_asset,2), '额外分红：',ultra_earn)
         print('总收益率：',total_rate,'，年均复合增长率：',per_rate)
         return year_asset
 
