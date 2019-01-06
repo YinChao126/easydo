@@ -68,16 +68,16 @@ class ts_app:
             return 0
         while True:
             day = TimeConverter.dtime2str(cur_day)
-            data = self.pro.daily_basic(ts_code=ID, trade_date=day, fields='trade_date,close')
-            cur_day -= timedelta(1)        
+            data = self.pro.daily_basic(ts_code=ID, trade_date=day, fields='trade_date,close')       
             if data.empty != True:
                 break
+            cur_day -= timedelta(1) 
             cnt -= 1
             if cnt < 0:
                 return 0
         price = data.iloc[0]['close']
 #        print(ID, day, price)
-        return price
+        return price, day
     
     def GetFinanceTable(self, ID, n):
         '''

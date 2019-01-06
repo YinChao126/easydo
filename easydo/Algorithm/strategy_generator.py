@@ -4,14 +4,20 @@ Created on Sat Dec 22 01:04:20 2018
 
 @author: YinChao
 """
+import sys,os
+BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OTHER_DIR = BASE_DIR + r'\Algorithm'
+sys.path.append(OTHER_DIR)
+OTHER_DIR = BASE_DIR + r'\Miscellaneous'
+sys.path.append(OTHER_DIR)
+OTHER_DIR = BASE_DIR + r'\Data'
+sys.path.append(OTHER_DIR)
+
 import pandas as pd
-import get_price
 from datetime import datetime
 from datetime import timedelta
-#import trade_day
-#import get_k_day
-global record
-global invest_list #历史投资变量，全局变量
+from Miscellaneous import TimeConverter
+from Data import TushareApp
 
 def create_test_invest_list():
     '''
@@ -44,6 +50,7 @@ class InvestRecordGenerator:
     @描述： 该类专门用来实现各种策略，生成可供回测的invest_list
     @已提供的策略：
     single_mode 每月固定时间点定投单支股票
+    double_mode 每月固定时间定投两支股票，对半分
     '''
     def __init__(self,exchange_list, money, start_day, stop_day):
         '''
@@ -55,34 +62,19 @@ class InvestRecordGenerator:
         '''
         self.id_list = exchange_list
         self.money = money
+        self.ts_app = TushareApp.ts_app()
         
         header = ['deal_time','id','amount','price','direction']
         self.invest_list =pd.DataFrame(columns=header)
         today = datetime.now()
-        try:
-            start = datetime.strptime(start_day,'%Y%m%d')
-            stop = datetime.strptime(stop_day,'%Y%m%d')
-        except:
-            for i in stop_day:
-                if i == '-':
-                    start = datetime.strptime(start_day,'%Y-%m-%d')
-                    stop = datetime.strptime(stop_day,'%Y-%m-%d')
-                    break
-                elif i == '.':
-                    start = datetime.strptime(start_day,'%Y.%m.%d')
-                    stop = datetime.strptime(stop_day,'%Y.%m.%d')
-                    break
-                elif i == '/':
-                    start = datetime.strptime(start_day,'%Y/%m/%d')
-                    stop = datetime.strptime(stop_day,'%Y/%m/%d')
-                    break
+        start = TimeConverter.str2dtime(start_day)
+        stop = TimeConverter.str2dtime(stop_day)
         if stop > today:
             stop = today
-    #    print(today, start, stop)
-        
+#        print(today, start, stop)
         self.cur = start  
         self.stop = stop  
-    def get_last_month_day(self):
+    def _get_last_month_day(self):
         month_list = []
         last_month = self.cur.month
         while self.cur < self.stop:
@@ -96,84 +88,63 @@ class InvestRecordGenerator:
         return month_list
         
     def single_mode(self):
-        for day in self.get_last_month_day():
-#            print(day)
-            cnt = 3
-            while cnt > 0:
-                if 0 == trade_day.is_tradeday(day.strftime('%Y%m%d')):
-                    day -= timedelta(1)
-                    continue
-#                file_name = 'sh'+self.id_list[0]+'.csv'
-#                price = get_k_day.get_csv_price(file_name,day.strftime('%Y-%m-%d'))
-                price = get_price.get_close_price(self.id_list[0], day.strftime('%Y%m%d'))
-                price = float(price)
-                if price > 0.1:
-                    num_of_stock = int(self.money/price)
-                    item = {'deal_time':day.strftime('%Y%m%d'), 
-                            'id':self.id_list[0],
-                            'amount':str(num_of_stock),
-                            'price':str(price),
-                            'direction':1}
-                    self.invest_list = self.invest_list.append(item,ignore_index=True)
-#                    print(day, price)
-                    break
-                else:
-#                    break
-#                    print(day)
-                    day -= timedelta(1)
-                cnt -= 1
+        id_str = self.id_list[0]
+        for day in self._get_last_month_day():
+            day_str = TimeConverter.dtime2str(day)
+            price, day = self.ts_app.GetPrice(id_str,day_str)
+            print(price,day)
+            if price < 0.1:
+                continue
+            num_of_stock = int(self.money/price)
+            item = {'deal_time':day, 
+                    'id':id_str,
+                    'amount':str(num_of_stock),
+                    'price':str(price),
+                    'direction':1}
+            self.invest_list = self.invest_list.append(item,ignore_index=True)
         return self.invest_list
     
     def double_mode(self):
-        for day in self.get_last_month_day():
-#            print(day)
-            cnt = 3
-            while cnt > 0:
-                if 0 == trade_day.is_tradeday(day.strftime('%Y%m%d')):
-                    day -= timedelta(1)
-                    continue
-                price0 = float(get_price.get_close_price(self.id_list[0], day.strftime('%Y%m%d')))
-                price1 = float(get_price.get_close_price(self.id_list[1], day.strftime('%Y%m%d')))
-                if price1 > 0.1 and price0 > 0.1:
-                    num_of_stock0 = int(self.money/2/price0)
-                    num_of_stock1 = int(self.money/2/price1)
-                    item = {'deal_time':day.strftime('%Y%m%d'), 
-                            'id':self.id_list[0],
-                            'amount':str(num_of_stock0),
-                            'price':str(price0),
-                            'direction':1}
-                    self.invest_list = self.invest_list.append(item,ignore_index=True)
-                    item = {'deal_time':day.strftime('%Y%m%d'), 
-                            'id':self.id_list[1],
-                            'amount':str(num_of_stock1),
-                            'price':str(price1),
-                            'direction':1}
-                    self.invest_list = self.invest_list.append(item,ignore_index=True)
-                    print(day, price0, price1)
-                    break
-                elif price0 < 0.1:
-                    num_of_stock1 = int(self.money/price1)
-                    item = {'deal_time':day.strftime('%Y%m%d'), 
-                            'id':self.id_list[1],
-                            'amount':str(num_of_stock1),
-                            'price':str(price1),
-                            'direction':1}
-                    self.invest_list = self.invest_list.append(item,ignore_index=True)
-                    print(day, price1)
-                elif price1 < 0.1:
-                    num_of_stock1 = int(self.money/price0)
-                    item = {'deal_time':day.strftime('%Y%m%d'), 
-                            'id':self.id_list[0],
-                            'amount':str(num_of_stock0),
-                            'price':str(price0),
-                            'direction':1}
-                    self.invest_list = self.invest_list.append(item,ignore_index=True)
-                    print(day, price1)
-                else:
-#                    break
-                    print('no record')
-                    day -= timedelta(1)
-                cnt -= 1
+        for day in self._get_last_month_day():
+            day_str = TimeConverter.dtime2str(day)
+            price0, day0 = self.ts_app.GetPrice(self.id_list[0],day_str)
+            price1, day1 = self.ts_app.GetPrice(self.id_list[1],day_str)
+            if price0 < 0.1 and price1 < 0.1:
+                continue
+            elif price0 < 0.1:
+                num_of_stock1 = int(self.money/2/price1)
+                item1 = {'deal_time':day1, 
+                        'id':self.id_list[1],
+                        'amount':str(num_of_stock1),
+                        'price':str(price1),
+                        'direction':1}
+                self.invest_list = self.invest_list.append(item1,ignore_index=True)
+                print(day, price0, price1)
+            elif price1 < 0.1:
+                num_of_stock0 = int(self.money/2/price0)
+                item0 = {'deal_time':day1, 
+                        'id':self.id_list[1],
+                        'amount':str(num_of_stock0),
+                        'price':str(price1),
+                        'direction':1}
+                self.invest_list = self.invest_list.append(item0,ignore_index=True)
+               
+            else:
+                num_of_stock0 = int(self.money/2/price0)
+                num_of_stock1 = int(self.money/2/price1)
+                item0 = {'deal_time':day0, 
+                        'id':self.id_list[0],
+                        'amount':str(num_of_stock0),
+                        'price':str(price0),
+                        'direction':1}
+                self.invest_list = self.invest_list.append(item0,ignore_index=True)
+                item1 = {'deal_time':day1, 
+                        'id':self.id_list[1],
+                        'amount':str(num_of_stock1),
+                        'price':str(price1),
+                        'direction':1}
+                self.invest_list = self.invest_list.append(item1,ignore_index=True)
+                print(day, price0, price1)
         return self.invest_list
 
 if __name__ == '__main__':        

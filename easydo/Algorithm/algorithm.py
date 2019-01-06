@@ -336,7 +336,7 @@ class algorithm:
             num = stock_num[key]
             print(str_id, num)
             try:
-                price= ts_app.GetPrice(str_id)
+                price, day= ts_app.GetPrice(str_id)
                 asset = price * num
                 total_asset += asset
             except:

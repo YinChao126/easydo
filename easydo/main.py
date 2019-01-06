@@ -42,6 +42,16 @@ if __name__ == '__main__':
     invest_list = stg.create_test_invest_list()
     a = alg.algorithm.InvestAnalyse(invest_list,start_day,stop_day)
 
+#    #测试：生成策略
+#    stock_list = ['000651.SZ','600522.SH']
+#    invest_money = 10000
+#    start = '20180101'
+#    stop = '20181231'
+#    a = stg.InvestRecordGenerator(stock_list,invest_money,start,stop)
+##    invest_list = a.single_mode()
+#    invest_list = a.double_mode()
+#    print(invest_list)
+    
 #    #测试，用户登录    
 #    test = User.user.cUser('sss', '123')
 #    test.Login('s', 'a')
