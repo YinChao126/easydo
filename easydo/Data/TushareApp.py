@@ -29,6 +29,7 @@ class ts_app:
     GetPrice:获得指定个股指定一天的收盘价，如果当天没有则自动往前找
     GetOneYearFinanceTable:获得指定个股指定一年的财务统计数据
     GetFinanceTable:获得指定个股连续n年的年度财务统计数据（非常重要）
+    GetDividendTable:获得指定个股的全部分红历史（非常重要）
     
     AvgExchangeInfo:平均交易参数（换手率、PE_TTM、PB） （非常重要）
     AvgBasicInfo:平均财务指标（roe, 资产负债率）（非常重要）
@@ -154,6 +155,41 @@ class ts_app:
         data.drop_duplicates(subset=['end_date'],keep='first',inplace=True)
         return data
     
+    def GetDividendTable(self, ID):
+        '''
+        获得指定个股的分红记录
+        备注：数据来源于tushare的接口
+        分红、送股都是按每股送多少而定
+        '''
+        pro = ts.pro_api()
+#        df = pro.dividend(ts_code = ID)
+        dividend_fields = 'ts_code,end_date,div_proc,stk_bo_rate,stk_co_rate,cash_div_tax,ex_date'
+        df = pro.dividend(ts_code=ID, fields=dividend_fields)
+#        print(df)
+        length = len(df)
+        ts_code = df['ts_code']
+        end_date = df['end_date']
+        years = []
+        for s in end_date:
+            result = s[:4]
+            years.append(result)
+        cash_div_tax = df['cash_div_tax']
+        stk_co_rate = df['stk_co_rate'].copy()
+        for i in range(length):
+            if stk_co_rate[i] != stk_co_rate[i]:
+                stk_co_rate[i] = 0
+        stk_bo_rate = df['stk_bo_rate'].copy()
+        for i in range(length):
+            if stk_bo_rate[i] != stk_bo_rate[i]:
+                stk_bo_rate[i] = 0
+        ex_date = df['ex_date']
+        out = pd.DataFrame(list(zip(ts_code,years,cash_div_tax,stk_co_rate,stk_bo_rate,ex_date)),columns=['名称','年度','派息','转股','送股','除权日'])
+        for i in range(length):
+            if ex_date[i] == None:
+                out = out.drop(i)
+        out = out.sort_values(by=['年度'])
+        out.index = range(len(out))
+        return out
     def BasicInfo(self, ID):
         '''
         输入一个个股和开始日期，获得一个DataFrame格式基本情况列表
