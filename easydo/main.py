@@ -9,6 +9,7 @@ import Data.TushareApp as TushareApp
 
 import User.user
 import Algorithm.algorithm as alg
+import Algorithm.strategy_generator as stg
 
 if __name__ == '__main__':
     id_str = ['000651.SZ', '002597.SZ','600377.SH','600660.SH','601012.SH']
@@ -23,9 +24,9 @@ if __name__ == '__main__':
 #    tbl = app.GetFinanceTable('000651.SZ',6)
 #    print(tbl)
 
-    #测试：获得股票估值水平
-    app = TushareApp.ts_app()
-    test = alg.algorithm.Estimation(id_str[-1], 0.0, 1)
+#    #测试：获得股票估值水平
+#    app = TushareApp.ts_app()
+#    test = alg.algorithm.Estimation(id_str[-1], 0.0, 1)
     
 #    #测试：获得个股前一天的基本情况
 #    app = TushareApp.ts_app()
@@ -35,11 +36,12 @@ if __name__ == '__main__':
 #    app = TushareApp.ts_app()
 #    out = app.GetDividendTable(id_str[0])
     
-    
+    #测试：根据投资列表求得投资收益率
+    start_day = '20100101'
+    stop_day = '20181224'
+    invest_list = stg.create_test_invest_list()
+    a = alg.algorithm.InvestAnalyse(invest_list,start_day,stop_day)
+
+#    #测试，用户登录    
 #    test = User.user.cUser('sss', '123')
 #    test.Login('s', 'a')
-#
-#    adv = alg.algorithm()
-#    stock_list = ['600660', '601012', '000651', '600522']
-#    a, b = adv.GetAdvise(10000, stock_list)
-#    print(a, b)
