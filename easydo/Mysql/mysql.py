@@ -5,7 +5,9 @@ import pymysql
 from sqlalchemy import create_engine
 import json
 import pandas as pd
-
+import sys
+BASE_DIR=os.path.dirname(os.path.dirname(sys.argv[0]))
+os.chdir(BASE_DIR) #将主目录添加到path中
 
 class sql:
     def __init__(self):

@@ -1,22 +1,16 @@
 import os,sys
 import pandas as pd
 import requests
-
-BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OTHER_DIR = BASE_DIR + r'\Algorithm'
-sys.path.append(OTHER_DIR)
-OTHER_DIR = BASE_DIR + r'\Miscellaneous'
-sys.path.append(OTHER_DIR)
-OTHER_DIR = BASE_DIR + r'\Data'
-sys.path.append(OTHER_DIR)
-
-import stock_bond_rate
-from Miscellaneous import TimeConverter
-from Data import TushareApp
-
 from datetime import datetime
 from datetime import timedelta
 import pandas as pd
+
+BASE_DIR=os.path.dirname(os.path.dirname(sys.argv[0]))
+os.chdir(BASE_DIR) #将主目录添加到path中
+
+import Algorithm.stock_bond_rate as stock_bond_rate
+import Miscellaneous.TimeConverter as TimeConverter
+import Data.TushareApp as TushareApp
 
 class algorithm:
 

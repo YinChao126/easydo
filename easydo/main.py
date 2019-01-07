@@ -6,8 +6,6 @@ Created on Thu Dec 27 22:00:36 2018
 本文件用于大量回测，探索股债比的有效性
 """
 import Data.TushareApp as TushareApp
-
-import User.user
 import Algorithm.algorithm as alg
 import Algorithm.strategy_generator as stg
 

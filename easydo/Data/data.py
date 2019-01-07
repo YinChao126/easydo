@@ -1,6 +1,12 @@
-import get_price
+import os
+import sys
 import pandas as pd
 import tushare as ts
+
+
+BASE_DIR=os.path.dirname(os.path.dirname(sys.argv[0]))
+os.chdir(BASE_DIR) #将主目录添加到path中
+import Data.get_price as get_price
 
 class data:
     def __init__(self):
@@ -151,12 +157,6 @@ class data:
 
 
 if __name__ == '__main__':
-    import sys
-    import os
-    BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    DATA_DIR = BASE_DIR + r'\Data'
-    sys.path.append(DATA_DIR)
-    
     data = data()
     print(data.get_index_data("000001.SH"))
 
