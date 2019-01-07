@@ -26,7 +26,8 @@ if __name__ == '__main__':
 
 #    #测试：获得股票估值水平
 #    app = TushareApp.ts_app()
-#    test = alg.algorithm.Estimation(id_str[-1], 0.0, 1)
+#    test = alg.algorithm()
+#    test.Estimation(id_str[-1], 0.0, 1)
     
 #    #测试：获得个股前一天的基本情况
 #    app = TushareApp.ts_app()
@@ -40,7 +41,8 @@ if __name__ == '__main__':
     start_day = '20100101'
     stop_day = '20181224'
     invest_list = stg.create_test_invest_list()
-    a = alg.algorithm.InvestAnalyse(invest_list,start_day,stop_day)
+    a = alg.algorithm()
+    a.InvestAnalyse(invest_list,start_day,stop_day)
 
 #    #测试：生成策略
 #    stock_list = ['600522.SH','601012.SH']

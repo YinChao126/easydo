@@ -35,7 +35,7 @@ class algorithm:
         print('you should invest %d to stock' % stock_money)
         return rate, advise_list
     
-    def Estimation(ID, est_growth, confidence=0.5):
+    def Estimation(self, ID, est_growth, confidence=0.5):
         '''
         更新：2018-12-31
         描述：输入ID和增长率手算值，自动得到目标价和溢价比率，提供投资建议
@@ -119,16 +119,19 @@ class algorithm:
         return est_price, flow_level
 
 
-    def InvestAnalyse(invest_list, start_day, stop_day):
+    def InvestAnalyse(self, invest_list, start_day, stop_day = 0):
         '''
-        用户调用APP，输入投资历史和起止时间，得到(风险-年化收益率)，总成本、总股息收益、总资产
-        输入：   投资列表->InvestRecord定义
+        @描述：用户调用APP，输入投资历史和起止时间，得到(风险-年化收益率)，总成本、总股息收
+              益、总资产
+        @输入：   投资列表->InvestRecord定义，必须是list类型
                 起止时间：必须是str格式，且固定为'20161003'格式！
-        输出： 
+                stop_day如果不填，默认是今天
+        @输出：投资收益率
+        @备注：风险波动率还没有实现
         '''
-        
-        #1. 根据设定好的起止时间，结合投资历史，获得投资的起始时间并截取投资列表
+###############################################################################
         '''
+        1. 起始时间确定： start/stop/ cur(首条投资时间)
         此处的逻辑比较复杂
         1. start_day比首条投资历史更久，直接将cur定到首条投资的当天
         2. start_day比首条投资历史晚，说明只是考察从中间某个时间的情况。此时需要截取投资历史
@@ -137,8 +140,12 @@ class algorithm:
         '''
         today = datetime.now()
         start = TimeConverter.str2dtime(start_day)
-        stop = TimeConverter.str2dtime(stop_day)
-                
+        try:
+            stop = TimeConverter.str2dtime(stop_day)
+            if stop > today:
+                stop = today
+        except:
+            stop = today
         invest_tbl = invest_list[invest_list.deal_time >= TimeConverter.dtime2str(start)]
         if invest_tbl.empty == True:
             print('没有投资记录')
@@ -150,7 +157,9 @@ class algorithm:
 #        print(invest_tbl)
 
 ###############################################################################
-        #2. 根据cur，直接向前搜索分红表，得到一个指针数组
+        '''
+        根据起始时间和目标个股，得到一个分红总表div_tbl并按时间顺序排列
+        '''
         stock_id = [] #获取投资标的    
         ts_app = TushareApp.ts_app()
         for i in range(len(invest_tbl)):
@@ -162,23 +171,22 @@ class algorithm:
         div_tbl = pd.DataFrame(columns=['名称','年度','派息','转股','送股','除权日'])
         for s in stock_id:
             tmp = ts_app.GetDividendTable(s)
-            tbl = tmp[tmp.除权日 >= TimeConverter.dtime2str(cur)]
+            tbl = tmp[(tmp.除权日 >= TimeConverter.dtime2str(cur)) & (tmp.除权日 <= TimeConverter.dtime2str(stop))]
             div_tbl = pd.concat([div_tbl,tbl])
         div_tbl = div_tbl.sort_values(by=['除权日'])
         div_tbl.index = range(len(div_tbl))
 #        print('\nstep3:获得个股名单，并根据分红表和cur，合成分红表')
-#        print(stock_id)
+#        print('个股名单：',stock_id)
 #        print(div_tbl)
 
 ###############################################################################    
         '''
-        根据投资列表和分红表，获得一个用于实际执行的时间列表,定义如下：
+        根据投资列表和分红表，获得一个用于实际执行的时间列表ex_tbl,定义如下：
         day         type                id
-        2017-09-10  dividend/buy        600660
+        2017-09-10  dividend/buy        600660.SH
         按时间排序
         数据类型定义：
         day:datetime， type：str  id：str
-        备注：还有bug没有解！cur如果很靠后的话，结果不对——20181217
         '''
         index_column = ['day','type','id']
         ex_tbl = pd.DataFrame(columns=index_column) #执行列表
@@ -251,25 +259,23 @@ class algorithm:
 #                print('\n\n')
                 div_id += 1
                
-#        print('\nstep5:交易完后的结果')
-#        print('股份数:',stock_num)
+        print('\nstep5:交易结果')
+        print('到期股份数:',stock_num)
         
 ###############################################################################
         total_asset = 0
         for key in stock_num:
             str_id = key
             num = stock_num[key]
-            try:
-                price, day= ts_app.GetPrice(str_id)
-                asset = price * num
-                total_asset += asset
-            except:
-                pass
+            last_day = TimeConverter.dtime2str(stop)
+            price, day= ts_app.GetPrice(str_id, last_day)
+            asset = price * num
+            total_asset += asset
             
         total_rate = round((total_asset - cost)/cost, 4)
         per_rate = round(total_rate / (stop.year - cur.year+1),4)
-#        print('\nstep6:收益统计')
-#        print('成本:', round(cost,2), '期末资产：', round(total_asset,2), '额外分红：',ultra_earn)
+        print('\nstep6:收益统计')
+        print('成本:', round(cost,2), '期末资产：', round(total_asset,2), '额外分红：',ultra_earn)
         print('总收益率：',total_rate,'，年均复合增长率：',per_rate)
         return year_asset
 

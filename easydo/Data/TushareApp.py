@@ -44,6 +44,7 @@ class ts_app:
         此处的token请勿修改
         fields建议不要改动，自定义的字段请在append_table中添加
         '''
+        ts.set_token('dbc6483be88b981e2445a2f20e8c6e8566b59191646f054345247bc0')
         self.pro = ts.pro_api('dbc6483be88b981e2445a2f20e8c6e8566b59191646f054345247bc0')
         self.fields = ['ts_code','end_date','roe_yearly','eps','dt_eps','bps','cfps',
                    'debt_to_assets','ebit_of_gr','roe_waa','roa']
