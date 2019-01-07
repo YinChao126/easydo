@@ -112,3 +112,4 @@ out/
 __pycache__/
 *.pyc
 sql_config.json
+parameter.cfg

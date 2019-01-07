@@ -7,7 +7,7 @@ import json
 import pandas as pd
 import sys
 BASE_DIR=os.path.dirname(os.path.dirname(sys.argv[0]))
-os.chdir(BASE_DIR) #将主目录添加到path中
+os.chdir(BASE_DIR) #将工作目录切换到主目录上
 
 class sql:
     def __init__(self):

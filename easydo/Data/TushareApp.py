@@ -9,15 +9,12 @@ import tushare as ts
 from datetime import datetime
 from datetime import timedelta
 import time
-#from matplotlib import pyplot as plt
-#import matplotlib.lines as mlines
 
 import os,sys
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OTHER_DIR = BASE_DIR + r'\Miscellaneous'
-sys.path.append(OTHER_DIR)
+os.chdir(BASE_DIR) #将工作目录切换到主目录上
 
-from Miscellaneous import TimeConverter
+import Miscellaneous.TimeConverter as TimeConverter
 
 class ts_app:
     '''
@@ -44,14 +41,20 @@ class ts_app:
         此处的token请勿修改
         fields建议不要改动，自定义的字段请在append_table中添加
         '''
-        ts.set_token('dbc6483be88b981e2445a2f20e8c6e8566b59191646f054345247bc0')
-        self.pro = ts.pro_api('dbc6483be88b981e2445a2f20e8c6e8566b59191646f054345247bc0')
-        self.fields = ['ts_code','end_date','roe_yearly','eps','dt_eps','bps','cfps',
-                   'debt_to_assets','ebit_of_gr','roe_waa','roa']
-        append_table = ['basic_eps_yoy','dt_eps_yoy','op_yoy'] #自主添加
-        self.fields += append_table
-    
-        self.save_path = './avg_info.csv'
+        token_file = os.path.dirname(BASE_DIR)+r'\parameter.cfg'
+        with open(token_file, 'r') as fh:
+            content = fh.read()
+        try:
+            ts.set_token(content)
+            self.pro = ts.pro_api(content)
+            self.fields = ['ts_code','end_date','roe_yearly','eps','dt_eps','bps','cfps',
+                       'debt_to_assets','ebit_of_gr','roe_waa','roa']
+            append_table = ['basic_eps_yoy','dt_eps_yoy','op_yoy'] #自主添加
+            self.fields += append_table
+        
+            self.save_path = './avg_info.csv'
+        except:
+            print('tushare初始化失败，请确保parameter.cfg放在根目录下')
     def GetPrice(self, ID,cur_day = 0):
         '''
         获取指定一天的收盘价，默认获取最近一天的价格
@@ -652,11 +655,11 @@ if __name__ == '__main__':
 #    a = app.AvgExchangeInfo(l, '20181111')
 #    print(a)
     
-    b = app.GetPrice(l,'19000101')
-    print(b)
-    app.update_one(l,2)
-    for s in range(1,6):
-        app.update_one(id_str,s)
+#    b = app.GetPrice(l,'19000101')
+#    print(b)
+#    app.update_one(l,2)
+#    for s in range(1,6):
+#        app.update_one(id_str,s)
     
 #    a = app._DailyRecord(l,'20181220')
 #    print(a)
