@@ -60,7 +60,7 @@ class ts_app:
         获取指定一天的收盘价，默认获取最近一天的价格
         @输入： ID(str)-> '600660.SH'
                cur_day(str/datetime) -> '20181012', '2018-10-12', datetime类型 
-        @返回值：price(float)
+        @返回值：price(float)价格  day(datetime)实际日期
         备注：如果连续60天都找不到，则返回0（长时间停牌或者未上市）
         '''
         cnt = 60
@@ -225,18 +225,9 @@ class ts_app:
         
         备注：该函数为辅助函数，用户禁止调用
         '''
-        stop_day = datetime.now() - timedelta(1)
+        stop_day = datetime.now()
         cur_day = TimeConverter.str2dtime(start_day)
-        while cur_day < stop_day: #获得第一天
-            day = TimeConverter.dtime2str(cur_day)
-            data = self.pro.daily_basic(ts_code=ID, trade_date=day, fields='trade_date,turnover_rate,pe_ttm,pb')
-            cur_day += timedelta(1)        
-            if data.empty != True:
-                break
-        if data.empty == True:
-            print('no data')
-            return 0
-        
+        data = pd.DataFrame(columns=['trade_date','turnover_rate','pe_ttm','pb'])
         while cur_day < stop_day:
             if cur_day.weekday() < 5:
                 try:
@@ -244,11 +235,9 @@ class ts_app:
                     info = self.pro.daily_basic(ts_code=ID, trade_date=day, fields='trade_date,turnover_rate,pe_ttm,pb')
                     data = pd.concat([data, info], axis = 0)
                     time.sleep(0.15)
-                    print(cur_day)
                 except:
                     pass
             cur_day += timedelta(1)
-        
         data.index = range(len(data))
         return data
     
@@ -427,7 +416,7 @@ class ts_app:
 #            print(records)
             records.to_csv(file_name,index =False)
         else:
-#            print('已有记录，直接在原有基础上更新即可')
+            print('已有记录，直接在原有基础上更新即可')
             '''
             此处有bug
             loc[0,'xxx']已经变了，首次是0，之后都是1了。。
@@ -439,16 +428,16 @@ class ts_app:
             total_day = df_result.loc[index_name,'days']            
             start_day = df_result.loc[index_name,'stop_day']
             start_day = TimeConverter.str2dtime(start_day)
-            
             today = datetime.now()
 #            print(start_day, today)
             if TimeConverter.dtime2str(start_day) == TimeConverter.dtime2str(today):
                 print('already latest')
                 return 0
             
+#            print(start_day)
 #            print('old value:',old_turnover, old_pe, old_pb)
             append_list = self._DailyRecord(id_str,TimeConverter.dtime2str(start_day))
-            if append_list == 0: #最近更新的那一天没有记录（周末或者节假日）
+            if isinstance(append_list,int): #最近更新的那一天没有记录（周末或者节假日）
                 print('already latest')
                 return
             turnover_add = append_list['turnover_rate'].sum()
@@ -652,11 +641,12 @@ if __name__ == '__main__':
     l = '600660.SH'
     id_str = '000651.SZ'
     app = ts_app()
+#    app.update()
 #    a = app.AvgExchangeInfo(l, '20181111')
 #    print(a)
     
-#    b = app.GetPrice(l,'19000101')
-#    print(b)
+    b = app.GetPrice(l,'20180101')
+    print(b)
 #    app.update_one(l,2)
 #    for s in range(1,6):
 #        app.update_one(id_str,s)

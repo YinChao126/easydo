@@ -24,8 +24,7 @@ def str2dtime(str_time):
           月份和日期必须保证 xx, xx 比如：01 03
     '''
     separator = str_time[4]
-    len_date = len(str_time)
-    if len_date == 8:
+    if separator <= '9' and separator >= '0':
         separator = ''
     day_formate = '%Y' + separator + '%m' + separator + '%d'
     return datetime.strptime(str_time,day_formate)
@@ -53,7 +52,7 @@ def is_equal(time1, time2):
     
     
 if __name__ == '__main__':
-    a = str2dtime('20181201') 
+    a = str2dtime('2018/2/1') 
     print(a)
 #    b =dtime2str(a,'/')
 #    print(b)
