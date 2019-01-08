@@ -5,8 +5,7 @@ import tushare as ts
 
 
 BASE_DIR=os.path.dirname(os.path.dirname(sys.argv[0]))
-os.chdir(BASE_DIR) #将工作目录切换到主目录上
-#sys.path.append(BASE_DIR)
+sys.path.append(BASE_DIR)
 import Data.get_price as get_price
 
 class data:

@@ -12,7 +12,7 @@ import time
 
 import os,sys
 BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.chdir(BASE_DIR) #将工作目录切换到主目录上
+sys.path.append(BASE_DIR)
 
 import Miscellaneous.TimeConverter as TimeConverter
 
@@ -52,7 +52,7 @@ class ts_app:
             append_table = ['basic_eps_yoy','dt_eps_yoy','op_yoy'] #自主添加
             self.fields += append_table
         
-            self.save_path = './avg_info.csv'
+            self.save_path = 'avg_info.csv'
         except:
             print('tushare初始化失败，请确保parameter.cfg放在根目录下')
     def GetPrice(self, ID,cur_day = 0):
@@ -347,6 +347,8 @@ class ts_app:
         更新agv_info.csv到最近一天
         '''
         today = datetime.now()
+        if today.hour < 15: #如果当天还未收盘，则更新到昨天
+            today -= timedelta(1)
         content = pd.read_csv(self.save_path)
         for i in range(len(content)):
             item = content.loc[i]
