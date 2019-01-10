@@ -22,7 +22,8 @@ class SinaApp:
     @描述：从新浪财经获取的数据
     @已提供API列表：
     >>UpdateKday:更新指定个股的k线数据，如果没有则自动创建，结果持久化到本地或者数据库
-    >>GetInfo:获取指定个股某一天的交易数据(close,high,low,open,volume)    
+    >>GetInfo:获取指定个股某一天的交易数据(close,high,low,open,volume)   
+    >>get_k_day:获取指定个股指定天数的K线数据，以DataFrame格式返回
     >>ClosePrice：获取指定个股某一天的收盘价
     '''
     
@@ -33,24 +34,38 @@ class SinaApp:
         compatible:兼容模式，开启后使用更方便（效率显著降低）
         兼容模式下：自动检查更新，自动检查输入数据类型并自动切换
         '''
-        self.data_path = BASE_DIR + '\\Data\\raw_data\\'
+        self.data_path = BASE_DIR + '\\Data\\raw_data\\' #默认文件保存地址
+        if os.path.exists(self.data_path) == False:
+            os.makedirs(self.data_path)
         self.compatible = True #默认打开，方便使用,想要禁止，请设置为False
+        self.log = True #调试语句和显示语句使能开关
 
-  
-    def UpdateKday(self, id_str,mode = 'CSV'):
+    def UpdateKday(self, mid, mode = 'CSV'):
+        '''
+        @用户接口API：
+        @描述：输入一个id列表或者单个id，自动获取其所有的k线历史并自动存档
+        @
+        '''
+        if isinstance(mid, str):
+            self.update_one(mid,mode)
+        elif isinstance(mid, list):
+            for item in mid:
+                self.update_one(item,mode)
+                
+    def update_one(self, id_str,mode = 'CSV'):
         '''
         @描述：检查指定路径下是否包含最新的资源，如果不包含，则更新
         1. 检查是否有该文件
         2. 检查是否为最新记录，不是则更新
-        3. 根据mode指定是全部重新更新，还是append方式快速更新
-        @输入：id_list->更新列表，可以是多个标的
-             file_path->CSV文件存放地址
-             mode->更新方式， CSV:存本地， SQL:存数据库
+        3. 根据mode指定是保存到本地CSV还是到数据库
+        @输入：id_str(str)->更新标的，必须是单个股票，且格式固定为： 'sh600660'
+              mode->更新方式， CSV:存本地， SQL:存数据库
         @输出：./Data/raw_data/文件夹下自动建立id_str.csv文件
         '''
-        print('checking ...')
-#        for id_str in id_list:
+        if self.log == True:
+            print('checking ...')
         file_name = self.data_path + id_str + '.csv'
+
         try:
             content = pd.read_csv(file_name)  
             latest_record = content.iloc[-1]
@@ -62,9 +77,11 @@ class SinaApp:
             
             
             if latest == today: #已经是最新的
-                print('%s already the latest' % id_str)
+                if self.log == True:
+                    print('%s already the latest' % id_str)
             else: #append方式更新
-                print('update %s,please wait...' % id_str)
+                if self.log == True:
+                    print('update %s,please wait...' % id_str)
                 update_day = abs(today-latest)
                 update_day = update_day.days #更新时间
                 
@@ -79,10 +96,11 @@ class SinaApp:
                 append_item.to_csv(file_name,mode='a', header=False, index = False) 
         except:
             print('no record yet, creating %s.csv,please wait...' % id_str)
-            return
             a = self.get_k_day(id_str)
             a.to_csv(file_name,index = False) 
-        print('finished')   
+            
+        if self.log == True:
+            print('finished')   
 
     def GetInfo(self, id_str, date):
         '''
@@ -100,7 +118,7 @@ class SinaApp:
             elif isinstance(date, str):
                 date = TimeConverter.str2dtime(date)
                 date = TimeConverter.dtime2str(date,'-')
-#            self.UpdateKday(id_str) #自动更新
+            self.UpdateKday(id_str) #自动更新
             
         file_name = self.data_path + id_str + '.csv'
         content = pd.read_csv(file_name)
@@ -164,7 +182,8 @@ class SinaApp:
         '''
         file_name = self.data_path + id_str + '.csv'
         content = pd.read_csv(file_name)
-        print(content)
+        if self.log == True:
+            print(content)
     
         ilen = len(content)
         i = 0
@@ -190,7 +209,6 @@ class SinaApp:
             yesterday = today
         content = content.sort_values(by='day')
         content.to_csv('out.csv', index = False)
-        print(len(content))
         return content    
 ###############################################################################    
 
@@ -206,14 +224,17 @@ if __name__ == '__main__':
     3. 每次获取都统一从k_day.csv一个文件中获取，没有就append进去
     '''
     test = SinaApp()
+#    test.update_one('sh600660')
+    
+    ll = ['sh600660','sh601012','sh600377','sh000001']
     
     #更新k线数据
-#    test.UpdateKday(['sh600660'])
+    test.UpdateKday(ll)
     
     #获取指定一天的数据
-#    a = test.GetInfo('sh600660','2019/01/08')
+    a = test.GetInfo('sh600660','2019/01/08')
 
     #获取指定一天的价格
-    a = test.ClosePrice('sh600660','2019-01-08')
+#    a = test.ClosePrice('sh600660','2019-01-08')
 
-    print(a)
+#    print(a)
