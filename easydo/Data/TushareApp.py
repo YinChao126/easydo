@@ -234,7 +234,8 @@ class ts_app:
                     day = TimeConverter.dtime2str(cur_day)
                     info = self.pro.daily_basic(ts_code=ID, trade_date=day, fields='trade_date,turnover_rate,pe_ttm,pb')
                     data = pd.concat([data, info], axis = 0)
-                    time.sleep(0.15)
+                    time.sleep(0.2)
+                    print(day)
                 except:
                     pass
             cur_day += timedelta(1)
@@ -304,7 +305,7 @@ class ts_app:
                     day = TimeConverter.dtime2str(cur_day)
                     info = self.pro.daily_basic(ts_code=ID, trade_date=day, fields='trade_date,turnover_rate,pe_ttm,pb')
                     data = pd.concat([data, info], axis = 0)
-                    time.sleep(0.15)
+                    time.sleep(0.2)
                     print(cur_day)
                 except:
                     pass
@@ -382,7 +383,7 @@ class ts_app:
 #        print(df_result)
 #        return
         if df_result.empty == True:
-#            print('没有这条记录，重新更新')
+            print('没有这条记录，重新更新')
             today = datetime.now()
             default_data = {'id':id_str,
                             'year':years,

@@ -44,17 +44,14 @@ class algorithm:
         '''
         #1.参数输入
         ts_app = TushareApp.ts_app()
-        eps = 0.72 #去年除非每股收益，财报爬取即可
-        tbl = ts_app.GetFinanceTable(ID,1)
-        eps = tbl.iloc[-1]['dt_eps']
-        if not eps: #如果没有除非eps，则用eps代替
-            eps = tbl.iloc[-1]['eps']
-        avg_growth = ts_app.AvgGrowthInfo(ID,5)#过去5年eps平均增长率，财报爬取
+        avg_growth = ts_app.AvgGrowthInfo(ID,5)#过去5年eps平均增长率，财报爬取       
         turnover, avg_pe, avg_pb = ts_app.AvgExchangeInfo(ID, 3)#过去3年平均PE、换手率
-        
         basic = ts_app.BasicInfo(ID) #最近收盘的基本情况
         cur_pe= basic.iloc[-1]['pe']
+        cur_pe_ttm= basic.iloc[-1]['pe_ttm']
         cur_price = basic.iloc[-1]['close']
+        cur_eps = cur_price / cur_pe
+        print('当前水平：(price, pe, pe_ttm):',cur_price,cur_pe,cur_pe_ttm)
 #        print(basic)
         
         #成长型股票PE修正
@@ -73,13 +70,16 @@ class algorithm:
         '''
         
         confidence = 0.2 + confidence * 0.6#实际权值范围[0.2-0.8]，防止过分自信和悲观
-        growth = avg_growth * (1-confidence) + est_growth * confidence
-        est_price = cur_price / cur_pe * avg_pe * (1+growth)
+        growth = round(avg_growth * (1-confidence) + est_growth * confidence, 4)
+        est_price_growth = cur_price / cur_pe * avg_pe * (1+growth)
+        est_price_pe = cur_eps * avg_pe
+        est_price = est_price_pe
+        print('平均PE:',avg_pe,'平均增长率：',avg_growth,'增长率加权:',growth)
+        print('估值定义：增长估值指根据已有增长形势估计年末的估价，现价估值指当前价格估计')
+        print('现价:',cur_price,'增长估值：',round(est_price_growth,2),'现价估值：',round(est_price_pe,2))
+        if est_price_growth < est_price_pe:
+            est_price = est_price_growth
         overflow_rate = (cur_price - est_price) / est_price
-        
-        print('平均PE:',avg_pe,'平均增长率：',avg_growth,'增长率加权:',round(growth,4))
-        print('现价:',cur_price,'年末估计值：',est_price)
-        
         '''
         市值表现核对，估值溢价计算与投资建议
         溢价定义：
