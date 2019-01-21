@@ -1,10 +1,21 @@
-import get_price
+import os
+import sys
 import pandas as pd
 import tushare as ts
+
+
+BASE_DIR=os.path.dirname(os.path.dirname(sys.argv[0]))
+sys.path.append(BASE_DIR)
+import Data.get_price as get_price
 
 class data:
     def __init__(self):
         self.data = 0
+        token_file = os.path.dirname(BASE_DIR)+r'\parameter.cfg'
+        with open(token_file, 'r') as fh:
+            content = fh.read()
+        print(token_file)
+        ts.set_token(content)
     
     def get_yesterday_price(self, stock_id):
         return get_price.get_close_price(stock_id)
@@ -21,7 +32,7 @@ class data:
     获取一段时间内的指数
     ''' 
     def get_index_data(self,id):
-        api = ts.pro_api('2dbe42e7773b4591a74a07d19a30f3f7d9a663f2023f27f6e38dfde1')
+        api = ts.pro_api()
         a = []
         for i in range(1990,2030,5):
             print(i)
@@ -151,12 +162,6 @@ class data:
 
 
 if __name__ == '__main__':
-    import sys
-    import os
-    BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    DATA_DIR = BASE_DIR + r'\Data'
-    sys.path.append(DATA_DIR)
-    
     data = data()
     print(data.get_index_data("000001.SH"))
 
