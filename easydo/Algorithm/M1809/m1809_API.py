@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 '''
 文档说明
+此模块为整个基本面分析的对外API模块
+使用说明：
+1.初始化：M1809实例初始化是需要传入三个参数（均有初始值）：company_id_list，DataSource和LocalStore。
+         company_id_list为待分析的股票列表
+         DataSource的值为'SQL'或'CSV',分别值指选择数据来源为sql或者本地CSV文件
+         LocalStore的值为'ON'或'OFF'，表示是否将分析结果写入本地文本
+2.直接调用M1809_Run()
 '''
 import os
 from datetime import datetime
@@ -125,8 +132,4 @@ if __name__ == '__main__':
     company_id_list = ['000651', '000333']
     DataSource = "CSV"
     AObject = M1809(company_id_list, DataSource)
-    # AObject.M1809_Init()
-    # self_result, compare_result= AObject.M1809_GetData()
-    # print (self_result, compare_result)
-    # AObject.M1809_Analyse()
     AObject.M1809_Run()
