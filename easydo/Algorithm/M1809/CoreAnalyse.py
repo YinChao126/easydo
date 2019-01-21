@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 #mpl.rcParams['font.sans-serif'] = ['SimHei']
 import txttoexcel
 import numpy as np
+import os
 
 
 class CoreAnalyse:
@@ -178,14 +179,15 @@ class CoreAnalyse:
         plt.show()
 
     # API接口函数
-    def Analyse(self, self_data, total_data, ID):
+    def Analyse(self, self_data, total_data, ID, BasePath):
         '''
         API函数，用户可调用
         直接根据配置信息，从云端获取数据，填充字段，输出txt分析文件，并得到统计分数
         '''
         s = time.strftime("_%Y%m%d")
         s1 = time.strftime("%Y-%m-%d")
-        file_name = '../output/' + '诊断报告_' + ID + s + '.txt'  #形成文件名
+        file_name = '诊断报告_' + ID + s + '.txt'  #形成文件名
+        file_name = os.path.join(BasePath,file_name)
         with open(file_name, 'w') as fh:
             fh.write('版本号：V1.0\n')
             fh.write('诊断时间：' + s1 + '\n')

@@ -113,7 +113,7 @@ class M1809:
         '''
         AnalyseObj = CoreAnalyse()
         self_result, compare_result = self.M1809_GetData()
-        AnalyseObj.Analyse(self_result, compare_result,self.company_id_list[0])
+        AnalyseObj.Analyse(self_result, compare_result,self.company_id_list[0],self.OutPath)
         AnalyseObj.PlotAnalyse(self_result)
 
     def M1809_Run(self):
