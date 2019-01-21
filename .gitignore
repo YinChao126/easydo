@@ -114,3 +114,5 @@ __pycache__/
 sql_config.json
 parameter.cfg
 raw_data/
+history_data/
+output/
