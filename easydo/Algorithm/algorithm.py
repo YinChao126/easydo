@@ -16,6 +16,7 @@ class algorithm:
 
     def __init__(self):
         self.ts_app = TushareApp.ts_app()
+        self.cur_day = datetime.now()
 
     def GetAdvise(self, money, stock_list):
         '''
@@ -29,9 +30,74 @@ class algorithm:
         print('you should invest %d to stock' % stock_money)
         return rate, advise_list
     
+    def AttentionRate(self, ID):
+        '''
+        更新：2019-2-21
+        描述：输入ID，根据历史数据和大盘走势，推断出该股的关注程度[炙手可热，关注热点，正常，较少关注，无人问津]
+        输入：
+        @ID(str)->个股ID号输出：无
+        返回值：
+        @ active_rate(int) -> [-2,2]，详见定义
+        '''
+        #1.参数输入
+        ts_app = TushareApp.ts_app()
+        avg_turnover, avg_pe, avg_pb = ts_app.AvgExchangeInfo(ID, 3)#过去3年平均PE、换手率
+#        basic = ts_app.BasicInfo(ID) #最近收盘的基本情况
+#        cur_turnover = basic.iloc[-1]['turnover_rate']
+        start_day = self.cur_day - timedelta(30)
+        daily_info = ts_app._DailyRecord(ID, TimeConverter.dtime2str(start_day))
+        d_day = daily_info.iloc[-1:] #当天数据
+        d_week = daily_info.iloc[-5:] #最近一周数据
+        d_month = daily_info.iloc[-20:] #最近一个月数据
+        
+        t_1 = d_day['turnover_rate'].mean()
+        t_5 = d_week['turnover_rate'].mean()
+        t_30 = d_month['turnover_rate'].mean()
+        
+        print('3年平均水平：',avg_turnover)
+        print('日，周，月平均水平：',t_1, t_5, t_30)
+        
+        '''
+        换手率分析逻辑
+        1. 如果月平均水平相近，周变化剧烈，说明近期有持续的短期资金异动
+        2. 如果月，周，日都变化剧烈，说明市场开始活跃了
+        4. 反之亦然
+        程度定义：
+        正常波动  日 < 50%  周 < 15%  月 < 5%
+        较大波动  日 < 100% 周 < 30%  月 < 10%
+        剧烈波动  日 > 100% 周 > 50%  月 > 20%
+        '''
+        ch_d = round((t_1 - avg_turnover) / avg_turnover,4)
+        ch_w = round((t_5 - avg_turnover) / avg_turnover,4)
+        ch_m = round((t_30 - avg_turnover) / avg_turnover,4)
+        print('日，周，月相对均值的变化趋势：',ch_d, ch_w, ch_m)
+        
+        #1. 总体趋势判断
+        if ch_d >= ch_w >= ch_m:
+            print('市场持续回暖')
+        if ch_d <= ch_w <= ch_m:
+            print('市场持续遇冷')
+        #2. 短期波动分析
+        if ch_d > 1:
+            if ch_w > 0.5:
+                print('炙手可热')
+            else:
+                print('当日巨额放量')
+                
+        elif ch_d > 0.5:
+            if ch_w > 0.3:
+                print('备受关注')
+            else:
+                print('当日大幅放量')
+                
+        
+        
+        return daily_info
+                
+        
     def Estimation(self, ID, est_growth, confidence=0.5):
         '''
-        更新：2018-12-31
+        更新：2019-2-21
         描述：输入ID和增长率手算值，自动得到目标价和溢价比率，提供投资建议
         输入：
         @ID(str)->个股ID号
@@ -50,35 +116,67 @@ class algorithm:
         cur_pe= basic.iloc[-1]['pe']
         cur_pe_ttm= basic.iloc[-1]['pe_ttm']
         cur_price = basic.iloc[-1]['close']
-        cur_eps = cur_price / cur_pe
-        print('当前水平：(price, pe, pe_ttm):',cur_price,cur_pe,cur_pe_ttm)
+        cur_eps = cur_price / cur_pe #当前的eps
+        print('统计参数一览表\n当天水平：(price, pe, pe_ttm):',cur_price,cur_pe,cur_pe_ttm)
 #        print(basic)
-        
+        avg_pe_raw = avg_pe
         #成长型股票PE修正
-        if avg_growth > 0.5: #50%以上算高增长，PE打6折，此时的PE不靠谱！
-            avg_pe *= 0.6
-        elif avg_growth > 0.3: #30%以上算中高速增长，PE打8折
+        company_type = 0
+        if avg_growth > 0.5: #50%以上算高增长，PE打8折，此时的PE不靠谱！
             avg_pe *= 0.8
-        elif avg_growth > 0.15: #15%以上算中速,PE打9折
+            company_type = '高成长'
+        elif avg_growth > 0.3: #30%以上算中高速增长，PE打9折
             avg_pe *= 0.9
-
-        #2.中间变量计算
-        '''
-        1.计算增长率：过去5年的平均增长率和预测的今年增长率加权
-        2.根据平均5年pe_ttm的水平结合现价，得到预测的价格
-        3.根据现价和预测价格推测出溢价水平
-        '''
-        
+            company_type = '中高成长'
+        elif avg_growth > 0.15: #15%以上算中速,PE打95折
+            avg_pe *= 0.95
+            company_type = '稳健型'
+        else:
+            company_type = '低成长成熟企业'
         confidence = 0.2 + confidence * 0.6#实际权值范围[0.2-0.8]，防止过分自信和悲观
         growth = round(avg_growth * (1-confidence) + est_growth * confidence, 4)
-        est_price_growth = cur_price / cur_pe * avg_pe * (1+growth)
-        est_price_pe = cur_eps * avg_pe
-        est_price = est_price_pe
-        print('平均PE:',avg_pe,'平均增长率：',avg_growth,'增长率加权:',growth)
-        print('估值定义：增长估值指根据已有增长形势估计年末的估价，现价估值指当前价格估计')
-        print('现价:',cur_price,'增长估值：',round(est_price_growth,2),'现价估值：',round(est_price_pe,2))
-        if est_price_growth < est_price_pe:
-            est_price = est_price_growth
+        print('历史平均PE_TTM:',avg_pe_raw,'平均增长率：',avg_growth)
+        print('加权PE_TTM:',avg_pe,'\t加权growth:',growth)
+        print('--------------------------------------------------')
+        #2.中间变量计算
+        
+        
+        print('开始估值...')
+        '''
+        静态估值（年报+平均市盈率+平均增长率估值）： 
+        年尾价格 = 历史加权平均市盈率 * 去年年报上除非每股收益 * （1 + 增长率）
+        说明：该方法估值相对较准确，但是
+        备注：此种方法必须等最近一年年报出来才有用，一般是5月以后再查比较好
+        '''
+        t1 = datetime.now()
+        data = ts_app.GetFinanceTable(ID,1)
+        dt_eps = data.iloc[0]['dt_eps']
+        if isinstance(dt_eps,float) == False:
+            print('警告：无法获取除非每股收益，用每股收益替代，有风险')
+            dt_eps = data.iloc[0]['eps']
+        report_time = data.iloc[0]['end_date']
+        report_time = TimeConverter.str2dtime(report_time)
+        delta = t1 - report_time
+        if delta.days > 365:
+            print('警告：去年的年报还没出来，静态预测值没意义')
+        static_est = avg_pe * dt_eps * (1+growth)
+        print('静态预测值：',static_est)
+        print('(pe,eps,growth):',avg_pe,dt_eps,growth)
+        
+        '''
+        动态估值（现价+动态市盈率估值）： 
+        年尾价格 = 当前价格 / 当前PE_TTM * 预期PE_TTM * （1 + 增长率/4）
+        备注：此处由于是PE_TTM，所以增长预期基本上已经包含在股价里去了，
+        只有最近一个季度增长没有反应到股价上去，所以增长率除以4
+        '''
+        est_price_growth = cur_price / cur_pe_ttm * avg_pe * (1+growth/4)
+        print('动态预测值：',est_price_growth)
+        print('(cur_price, cur_pe, avg_pe):',cur_price, cur_pe_ttm, avg_pe)
+        
+#        print('估值定义：增长估值指根据已有增长形势估计年末的估价，现价估值指当前价格估计')
+#        print('现价:',cur_price,'增长估值：',round(est_price_growth,2),'现价估值：',round(est_price_pe,2))
+
+        est_price = min(static_est, est_price_growth)
         overflow_rate = (cur_price - est_price) / est_price
         '''
         市值表现核对，估值溢价计算与投资建议
@@ -109,6 +207,9 @@ class algorithm:
         else:
             flow_level = -3
         
+        print('--------------------------------------------------')
+        print('结论：')
+        print('企业类型判断：',company_type)
         print('参考溢价等级：',flow_level)
         return est_price, flow_level
 
